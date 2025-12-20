@@ -1,0 +1,21 @@
+# Binaries
+mytool
+test
+*.out
+
+# Logs
+logs/*
+!logs/.keep
+
+# State
+state/*
+!state/.keep
+
+# Editor junk
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
