@@ -1,7 +1,18 @@
 #include <stdio.h>
 #include <string.h>
 #include "utils.h"
+#include "help.h"
 int main(int argc, char *argv[]) {
+    // Print the help command when writing wrong syntax
+   if(argc == 1){
+    print_help(argv[0]);
+    return 1;
+   }
+   if(strcmp(argv[1],"help")==0 || strcmp(argv[1], "--help")==0 || strcmp(argv[1], "-h")==0){
+    print_help(argv[0]);
+    return 1;
+   }
+    
     /* 1. Validate argument count */
     if (argc < 3) {
         printf("Usage: %s deploy <repo_url>\n", argv[0]);
@@ -23,6 +34,7 @@ int main(int argc, char *argv[]) {
     /* 6. Handle failure */
     if (ret != 0) {
         printf("Deployment failed :( \n");
+        print_help(argv[0]);
         return 1;
     }
     printf("Repository cloned successfully :) \n");
