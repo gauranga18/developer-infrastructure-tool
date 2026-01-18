@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A lightweight CLI tool for automating deployment of Dockerized applications from Git repositories on Linux systems">
+    <meta name="keywords" content="CLI, Docker, deployment, DevOps, C programming, Linux, infrastructure automation">
+    <meta name="author" content="Developer Infrastructure Tool Team">
     <title>Developer Infrastructure Tool - Documentation</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -17,14 +20,23 @@
         <ul>
             <li><a href="#overview">Overview</a></li>
             <li><a href="#status">Project Status</a></li>
+            <li><a href="#quickstart">Quick Start</a></li>
             <li><a href="#features">Features</a></li>
+            <li><a href="#architecture">Architecture</a></li>
             <li><a href="#structure">Project Structure</a></li>
             <li><a href="#prerequisites">Prerequisites</a></li>
             <li><a href="#installation">Installation</a></li>
             <li><a href="#usage">Usage</a></li>
+            <li><a href="#examples">Examples</a></li>
+            <li><a href="#commands">Command Reference</a></li>
+            <li><a href="#troubleshooting">Troubleshooting</a></li>
+            <li><a href="#security">Security Considerations</a></li>
+            <li><a href="#testing">Testing</a></li>
             <li><a href="#philosophy">Development Philosophy</a></li>
+            <li><a href="#comparison">Comparison with Similar Tools</a></li>
             <li><a href="#limitations">Limitations</a></li>
             <li><a href="#roadmap">Roadmap</a></li>
+            <li><a href="#faq">FAQ</a></li>
             <li><a href="#contributing">Contributing</a></li>
             <li><a href="#license">License</a></li>
         </ul>
@@ -40,16 +52,39 @@
             <h2>Overview</h2>
             <p>This project provides a command-line interface for deploying containerized applications with minimal configuration. The tool automates common DevOps tasks: cloning repositories, building Docker images, running containers, and tracking deployment state.</p>
             <p>Built from scratch in C to understand low-level system interactions, process management, and infrastructure automation without relying on high-level frameworks.</p>
-        </section>
-
-        <section id="audience">
-            <h2>Target Audience</h2>
+            
+            <h3>Target Audience</h3>
             <ul>
                 <li>Linux users seeking lightweight deployment automation</li>
                 <li>DevOps beginners learning infrastructure concepts</li>
                 <li>Systems programming learners building practical tools</li>
                 <li>Students interested in real-world C applications</li>
             </ul>
+        </section>
+
+        <section id="quickstart">
+            <h2>Quick Start</h2>
+            <p>Get up and running in 5 minutes:</p>
+            
+            <h3>1. Install Dependencies</h3>
+            <pre><code># Ubuntu/Debian
+sudo apt update
+sudo apt install git gcc make docker.io
+
+# Start Docker
+sudo systemctl start docker
+sudo usermod -aG docker $USER  # Add yourself to docker group
+newgrp docker  # Activate group changes</code></pre>
+
+            <h3>2. Clone and Build</h3>
+            <pre><code>git clone https://github.com/yourusername/mytool.git
+cd mytool
+make</code></pre>
+
+            <h3>3. Run Your First Deployment</h3>
+            <pre><code>./mytool deploy https://github.com/user/sample-app.git</code></pre>
+
+            <p>That's it! The tool will clone the repository, build the Docker image, and start the container.</p>
         </section>
 
         <section id="features">
@@ -62,11 +97,11 @@
                 <li>Exit code handling and error reporting</li>
                 <li>Modular C project structure</li>
                 <li>Basic logging framework</li>
+                <li>Git repository cloning</li>
             </ul>
 
             <h3>Planned</h3>
             <ul>
-                <li>Git repository cloning and validation</li>
                 <li>Docker image building from Dockerfiles</li>
                 <li>Container lifecycle management (start, stop, restart)</li>
                 <li>Deployment state persistence (JSON-based)</li>
@@ -75,6 +110,44 @@
                 <li>CI/CD configuration templates</li>
                 <li>Remote deployment via SSH</li>
                 <li>Multi-container orchestration</li>
+            </ul>
+        </section>
+
+        <section id="architecture">
+            <h2>Architecture</h2>
+            
+            <h3>How It Works</h3>
+            <p>The tool follows a simple pipeline when you run a deployment:</p>
+            <pre>
+1. Parse CLI Arguments
+   ↓
+2. Validate Repository URL
+   ↓
+3. Clone Git Repository
+   ↓
+4. Detect Dockerfile
+   ↓
+5. Build Docker Image
+   ↓
+6. Run Container
+   ↓
+7. Save Deployment State
+   ↓
+8. Report Status
+            </pre>
+
+            <h3>Component Interaction</h3>
+            <p><strong>main.c</strong> → Entry point, parses arguments, routes commands</p>
+            <p><strong>deploy.c</strong> → Orchestrates deployment workflow, coordinates other modules</p>
+            <p><strong>utils.c</strong> → Executes system commands, handles errors, provides helper functions</p>
+            <p><strong>config.c</strong> → Manages configuration and state persistence (planned)</p>
+
+            <h3>Design Decisions</h3>
+            <ul>
+                <li><strong>No external dependencies</strong>: Uses only standard C library and POSIX APIs</li>
+                <li><strong>Shell-out approach</strong>: Leverages existing Git and Docker CLI tools rather than reimplementing their functionality</li>
+                <li><strong>Stateless by default</strong>: Each command is independent (state tracking planned for V2)</li>
+                <li><strong>JSON for state</strong>: Human-readable, widely supported format for deployment tracking</li>
             </ul>
         </section>
 
@@ -103,13 +176,21 @@ mytool/
 
         <section id="prerequisites">
             <h2>Prerequisites</h2>
-            <ul>
-                <li>Linux operating system (Ubuntu 20.04+, Debian 11+, or similar)</li>
-                <li>GCC compiler (version 7.0 or higher)</li>
-                <li>Git (version 2.0+)</li>
-                <li>Docker (version 20.0+)</li>
-                <li>Make utility</li>
-            </ul>
+            <p>The following tools are required and here's why:</p>
+            
+            <h3>Operating System</h3>
+            <p><strong>Linux</strong> (Ubuntu 20.04+, Debian 11+, or similar) - The tool uses POSIX-specific APIs and assumes Linux-style directory structures and command availability.</p>
+
+            <h3>Build Tools</h3>
+            <p><strong>GCC</strong> (version 7.0+) - C compiler for building the source code. Clang also works.</p>
+            <p><strong>Make</strong> - Build automation tool for compiling the project with proper flags and dependencies.</p>
+
+            <h3>Runtime Dependencies</h3>
+            <p><strong>Git</strong> (version 2.0+) - Required for cloning repositories. The tool shells out to git commands.</p>
+            <p><strong>Docker</strong> (version 20.0+) - Container runtime for building images and running containers. Docker must be installed and the Docker daemon must be running.</p>
+
+            <h3>Optional</h3>
+            <p><strong>Valgrind</strong> - Memory leak detection for development and testing.</p>
         </section>
 
         <section id="installation">
@@ -127,6 +208,10 @@ cd mytool</code></pre>
             <h3>Manual Compilation</h3>
             <p>If Make is unavailable:</p>
             <pre><code>gcc -o mytool src/main.c src/utils.c src/deploy.c -Wall -Wextra</code></pre>
+
+            <h3>System-wide Installation (Optional)</h3>
+            <pre><code>sudo cp mytool /usr/local/bin/
+mytool --version  # Test installation</code></pre>
         </section>
 
         <section id="usage">
@@ -141,6 +226,249 @@ cd mytool</code></pre>
 
             <h3>Help</h3>
             <pre><code>./mytool --help</code></pre>
+        </section>
+
+        <section id="examples">
+            <h2>Examples</h2>
+            
+            <h3>Example 1: Deploy a Simple Web App</h3>
+            <pre><code># Deploy a Node.js app with Dockerfile in root
+./mytool deploy https://github.com/user/nodejs-app.git
+
+# The tool will:
+# 1. Clone the repository to /tmp/mytool-deployments/nodejs-app/
+# 2. Build Docker image tagged as 'nodejs-app:latest'
+# 3. Run container on default port (usually 80 or 8080)
+# 4. Display container ID and status</code></pre>
+
+            <h3>Example 2: Deploy with Custom Port (Planned for V2)</h3>
+            <pre><code># Expose container on port 3000
+./mytool deploy https://github.com/user/app.git --port 3000</code></pre>
+
+            <h3>Example 3: Deploy with Custom Name (Planned for V2)</h3>
+            <pre><code># Give deployment a memorable name
+./mytool deploy https://github.com/user/app.git --name my-production-app</code></pre>
+
+            <h3>Example 4: List Active Deployments (Planned for V2)</h3>
+            <pre><code># Show all running deployments
+./mytool list
+
+# Output:
+# NAME                  STATUS    PORT    IMAGE
+# my-production-app     running   8080    app:latest
+# api-server            running   3000    api:latest</code></pre>
+
+            <h3>Example 5: Stop a Deployment (Planned for V2)</h3>
+            <pre><code># Stop and remove a deployment
+./mytool stop my-production-app</code></pre>
+
+            <h3>Example 6: View Deployment Logs (Planned for V2)</h3>
+            <pre><code># Tail logs from a deployment
+./mytool logs my-production-app --follow</code></pre>
+        </section>
+
+        <section id="commands">
+            <h2>Command Reference</h2>
+            
+            <h3>Current Commands</h3>
+            
+            <h4>deploy</h4>
+            <p>Deploy an application from a Git repository.</p>
+            <pre><code>./mytool deploy &lt;repository-url&gt;</code></pre>
+            <p><strong>Arguments:</strong></p>
+            <ul>
+                <li><code>&lt;repository-url&gt;</code> - HTTPS or SSH Git repository URL</li>
+            </ul>
+            <p><strong>Exit Codes:</strong></p>
+            <ul>
+                <li>0 - Success</li>
+                <li>1 - General error</li>
+                <li>2 - Git clone failed</li>
+                <li>3 - Docker build failed</li>
+            </ul>
+
+            <h4>--version</h4>
+            <p>Display version information.</p>
+            <pre><code>./mytool --version</code></pre>
+
+            <h4>--help</h4>
+            <p>Display help information.</p>
+            <pre><code>./mytool --help</code></pre>
+
+            <h3>Planned Commands (V2+)</h3>
+            
+            <h4>list</h4>
+            <p>List all deployments and their status.</p>
+            <pre><code>./mytool list [--all]</code></pre>
+
+            <h4>stop</h4>
+            <p>Stop a running deployment.</p>
+            <pre><code>./mytool stop &lt;deployment-name&gt;</code></pre>
+
+            <h4>restart</h4>
+            <p>Restart a deployment.</p>
+            <pre><code>./mytool restart &lt;deployment-name&gt;</code></pre>
+
+            <h4>logs</h4>
+            <p>View deployment logs.</p>
+            <pre><code>./mytool logs &lt;deployment-name&gt; [--follow]</code></pre>
+
+            <h4>rollback</h4>
+            <p>Roll back to a previous deployment version.</p>
+            <pre><code>./mytool rollback &lt;deployment-name&gt;</code></pre>
+        </section>
+
+        <section id="troubleshooting">
+            <h2>Troubleshooting</h2>
+            
+            <h3>Common Issues</h3>
+
+            <h4>Error: "Docker daemon not running"</h4>
+            <p><strong>Problem:</strong> Docker service is not started.</p>
+            <p><strong>Solution:</strong></p>
+            <pre><code>sudo systemctl start docker
+sudo systemctl enable docker  # Start on boot</code></pre>
+
+            <h4>Error: "Permission denied" when accessing Docker</h4>
+            <p><strong>Problem:</strong> User not in docker group.</p>
+            <p><strong>Solution:</strong></p>
+            <pre><code>sudo usermod -aG docker $USER
+newgrp docker  # Or log out and back in</code></pre>
+
+            <h4>Error: "Git clone failed: Authentication required"</h4>
+            <p><strong>Problem:</strong> Trying to clone private repository without credentials.</p>
+            <p><strong>Solution:</strong></p>
+            <ul>
+                <li>Use HTTPS with access token: <code>https://token@github.com/user/repo.git</code></li>
+                <li>Use SSH URL with configured SSH keys: <code>git@github.com:user/repo.git</code></li>
+                <li>Configure Git credentials helper</li>
+            </ul>
+
+            <h4>Error: "No Dockerfile found"</h4>
+            <p><strong>Problem:</strong> Repository doesn't contain a Dockerfile.</p>
+            <p><strong>Solution:</strong></p>
+            <ul>
+                <li>Ensure repository has a <code>Dockerfile</code> in the root directory</li>
+                <li>Check file name is exactly "Dockerfile" (case-sensitive)</li>
+            </ul>
+
+            <h4>Error: "Build failed" or "docker build" errors</h4>
+            <p><strong>Problem:</strong> Dockerfile has syntax errors or build dependencies missing.</p>
+            <p><strong>Solution:</strong></p>
+            <ul>
+                <li>Test Dockerfile manually: <code>docker build -t test .</code></li>
+                <li>Check Docker build logs for specific errors</li>
+                <li>Verify base image exists and is accessible</li>
+            </ul>
+
+            <h4>Error: "Port already in use"</h4>
+            <p><strong>Problem:</strong> Another container or process is using the port.</p>
+            <p><strong>Solution:</strong></p>
+            <pre><code># Find what's using the port
+sudo lsof -i :8080
+
+# Stop the conflicting container
+docker stop &lt;container-id&gt;</code></pre>
+
+            <h4>Compilation Error: "gcc: command not found"</h4>
+            <p><strong>Problem:</strong> GCC not installed.</p>
+            <p><strong>Solution:</strong></p>
+            <pre><code>sudo apt install build-essential  # Ubuntu/Debian
+sudo yum groupinstall "Development Tools"  # RHEL/CentOS</code></pre>
+
+            <h3>Getting More Help</h3>
+            <p>If you encounter an issue not listed here:</p>
+            <ol>
+                <li>Check the logs in <code>logs/mytool.log</code></li>
+                <li>Run commands with verbose output (if available)</li>
+                <li>Search existing issues on GitHub</li>
+                <li>Open a new issue with: error message, OS version, Docker version, steps to reproduce</li>
+            </ol>
+        </section>
+
+        <section id="security">
+            <h2>Security Considerations</h2>
+            
+            <h3>Current Security Limitations</h3>
+            
+            <h4>Use of system() Function</h4>
+            <p>The current implementation uses <code>system()</code> for command execution, which has security implications:</p>
+            <ul>
+                <li><strong>Shell injection risk</strong>: User input is passed to shell without proper sanitization</li>
+                <li><strong>Environment variable exposure</strong>: Inherits all environment variables</li>
+                <li><strong>Limited error handling</strong>: Difficult to capture specific error types</li>
+            </ul>
+            <p><strong>Mitigation:</strong> V3 will replace <code>system()</code> with <code>fork()</code>/<code>exec()</code> for direct process control.</p>
+
+            <h4>No Input Validation</h4>
+            <p>Repository URLs and other inputs are not thoroughly validated, potentially allowing malicious input.</p>
+            <p><strong>Mitigation:</strong> Add URL parsing and validation in V2.</p>
+
+            <h4>Running as Root</h4>
+            <p>If run with sudo, the tool operates with elevated privileges unnecessarily.</p>
+
+            <h3>Security Best Practices</h3>
+            
+            <h4>For Users</h4>
+            <ul>
+                <li><strong>Never run as root</strong>: Add user to docker group instead</li>
+                <li><strong>Only deploy trusted repositories</strong>: Malicious Dockerfiles can execute arbitrary code</li>
+                <li><strong>Review Dockerfiles</strong>: Before deploying, inspect the Dockerfile for suspicious commands</li>
+                <li><strong>Use private repositories carefully</strong>: Avoid embedding credentials in URLs</li>
+                <li><strong>Limit network exposure</strong>: Don't expose containers to the internet without proper security</li>
+            </ul>
+
+            <h4>For Contributors</h4>
+            <ul>
+                <li><strong>Sanitize inputs</strong>: Validate and escape all user-provided data</li>
+                <li><strong>Use safe functions</strong>: Prefer <code>fork()</code>/<code>exec()</code> over <code>system()</code></li>
+                <li><strong>Avoid buffer overflows</strong>: Use bounded string functions (<code>strncpy</code>, <code>snprintf</code>)</li>
+                <li><strong>Check return values</strong>: Handle all error conditions</li>
+            </ul>
+
+            <h3>Reporting Security Issues</h3>
+            <p>If you discover a security vulnerability, please email security@example.com instead of opening a public issue.</p>
+        </section>
+
+        <section id="testing">
+            <h2>Testing</h2>
+            
+            <h3>Manual Testing</h3>
+            <p>Test the tool with a sample repository:</p>
+            <pre><code># Use a simple test repository
+./mytool deploy https://github.com/docker/getting-started.git
+
+# Verify container is running
+docker ps
+
+# Check logs
+docker logs &lt;container-id&gt;
+
+# Clean up
+docker stop &lt;container-id&gt;
+docker rm &lt;container-id&gt;</code></pre>
+
+            <h3>Memory Leak Testing</h3>
+            <p>Use Valgrind to check for memory leaks:</p>
+            <pre><code>valgrind --leak-check=full --show-leak-kinds=all ./mytool deploy https://github.com/user/app.git</code></pre>
+
+            <h3>Testing Your Contributions</h3>
+            <p>Before submitting a pull request:</p>
+            <ol>
+                <li><strong>Build with warnings</strong>: <code>make</code> should produce no warnings</li>
+                <li><strong>Test basic functionality</strong>: Run deploy command successfully</li>
+                <li><strong>Test error cases</strong>: Invalid URLs, missing Docker, permission errors</li>
+                <li><strong>Check for leaks</strong>: Run Valgrind to ensure no memory leaks</li>
+                <li><strong>Test on clean system</strong>: Verify on Ubuntu 20.04/22.04</li>
+            </ol>
+
+            <h3>Future Testing Plans</h3>
+            <ul>
+                <li>Unit tests for core functions</li>
+                <li>Integration tests with Docker containers</li>
+                <li>CI/CD pipeline with automated testing</li>
+                <li>Test coverage reporting</li>
+            </ul>
         </section>
 
         <section id="philosophy">
@@ -161,6 +489,105 @@ cd mytool</code></pre>
 
             <h3>Linux-First Approach</h3>
             <p>The tool is designed for Linux environments where Docker and Git are standard. This focus allows deep integration with Linux-specific features without cross-platform complexity.</p>
+
+            <h3>Learning-Oriented Design</h3>
+            <p>Every design decision prioritizes learning opportunities:</p>
+            <ul>
+                <li>Start simple, add complexity incrementally</li>
+                <li>Document why, not just what</li>
+                <li>Make the codebase approachable for beginners</li>
+                <li>Provide clear upgrade paths (V1 → V2 → V3)</li>
+            </ul>
+        </section>
+
+        <section id="comparison">
+            <h2>Comparison with Similar Tools</h2>
+            
+            <table border="1" cellpadding="10" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>mytool</th>
+                        <th>docker-compose</th>
+                        <th>Ansible</th>
+                        <th>Bash Scripts</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Language</strong></td>
+                        <td>C</td>
+                        <td>Python</td>
+                        <td>Python</td>
+                        <td>Bash</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Configuration</strong></td>
+                        <td>Minimal/None</td>
+                        <td>YAML</td>
+                        <td>YAML</td>
+                        <td>Code</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Learning Curve</strong></td>
+                        <td>Easy</td>
+                        <td>Moderate</td>
+                        <td>Steep</td>
+                        <td>Easy</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Multi-container</strong></td>
+                        <td>Planned (V3)</td>
+                        <td>Yes</td>
+                        <td>Yes</td>
+                        <td>Manual</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Remote Deployment</strong></td>
+                        <td>Planned (V3)</td>
+                        <td>No</td>
+                        <td>Yes</td>
+                        <td>Yes (SSH)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>State Management</strong></td>
+                        <td>Planned (V2)</td>
+                        <td>Yes</td>
+                        <td>Yes</td>
+                        <td>Manual</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Production Ready</strong></td>
+                        <td>No</td>
+                        <td>Yes</td>
+                        <td>Yes</td>
+                        <td>Depends</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Best For</strong></td>
+                        <td>Learning, simple deployments</td>
+                        <td>Multi-container apps</td>
+                        <td>Enterprise infrastructure</td>
+                        <td>Quick automation</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>When to Use mytool</h3>
+            <ul>
+                <li>You're learning DevOps and want to understand the fundamentals</li>
+                <li>You need a lightweight solution for personal projects</li>
+                <li>You want to understand what tools like docker-compose do under the hood</li>
+                <li>You're learning C and systems programming</li>
+            </ul>
+
+            <h3>When to Use Alternatives</h3>
+            <ul>
+                <li><strong>docker-compose</strong>: For production multi-container applications with complex networking</li>
+                <li><strong>Ansible</strong>: For managing infrastructure at scale across multiple servers</li>
+                <li><strong>Bash scripts</strong>: For quick, one-off automation tasks</li>
+                <li><strong>Kubernetes</strong>: For container orchestration in production environments</li>
+            </ul>
         </section>
 
         <section id="limitations">
@@ -168,17 +595,20 @@ cd mytool</code></pre>
             <ul>
                 <li><strong>Early Development</strong>: Core features still under implementation</li>
                 <li><strong>Local Deployment Only</strong>: No remote server or cloud support yet</li>
+                <li><strong>Single Container</strong>: No multi-container orchestration</li>
                 <li><strong>No Kubernetes</strong>: Single-host Docker deployments only</li>
                 <li><strong>Limited Error Recovery</strong>: Basic error handling without sophisticated rollback</li>
                 <li><strong>Security</strong>: Uses <code>system()</code> which has security implications</li>
                 <li><strong>Not Production-Ready</strong>: Suitable for learning and experimentation only</li>
+                <li><strong>No Configuration File</strong>: All configuration via CLI arguments</li>
+                <li><strong>No Monitoring</strong>: No built-in health checks or monitoring</li>
             </ul>
         </section>
 
         <section id="roadmap">
             <h2>Roadmap</h2>
             
-            <h3>V1 (Current)</h3>
+            <h3>V1 (Current - Q1 2025)</h3>
             <ul>
                 <li>[x] CLI argument parser</li>
                 <li>[x] Command execution framework</li>
@@ -187,66 +617,43 @@ cd mytool</code></pre>
                 <li>[ ] Container run/stop commands</li>
             </ul>
 
-            <h3>V2</h3>
+            <h3>V2 (Q2 2025)</h3>
             <ul>
                 <li>[ ] Deployment state persistence</li>
                 <li>[ ] Structured logging</li>
                 <li>[ ] Configuration file support</li>
                 <li>[ ] Environment variable management</li>
                 <li>[ ] Basic rollback functionality</li>
+                <li>[ ] List/status commands</li>
             </ul>
 
-            <h3>V3</h3>
+            <h3>V3 (Q3-Q4 2025)</h3>
             <ul>
                 <li>[ ] SSH-based remote deployment</li>
                 <li>[ ] Multi-container applications</li>
                 <li>[ ] Health check integration</li>
                 <li>[ ] CI/CD template generation</li>
                 <li>[ ] Replace <code>system()</code> with <code>fork()</code>/<code>exec()</code></li>
+                <li>[ ] Container networking configuration</li>
             </ul>
-        </section>
 
-        <section id="contributing">
-            <h2>Contributing</h2>
-            <p>Contributions are welcome. This is a learning project, so beginner-friendly contributions are encouraged.</p>
-            
-            <h3>How to Contribute</h3>
-            <ol>
-                <li>Fork the repository</li>
-                <li>Create a feature branch (<code>git checkout -b feature/new-feature</code>)</li>
-                <li>Make your changes with clear commit messages</li>
-                <li>Test thoroughly on Linux</li>
-                <li>Submit a pull request with description of changes</li>
-            </ol>
-
-            <h3>Coding Standards</h3>
+            <h3>Future Considerations</h3>
             <ul>
-                <li>Follow Linux kernel coding style</li>
-                <li>Use meaningful variable names</li>
-                <li>Comment complex logic</li>
-                <li>Handle errors explicitly</li>
-                <li>Avoid memory leaks (use <code>valgrind</code> for testing)</li>
+                <li>Plugin system for extensibility</li>
+                <li>Web UI for deployment management</li>
+                <li>Integration with CI/CD platforms</li>
+                <li>Support for other container runtimes (Podman)</li>
             </ul>
         </section>
 
-        <section id="license">
-            <h2>License</h2>
-            <p>MIT License</p>
-            <p>Copyright (c) 2024</p>
-            <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
-            <p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
-            <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
-        </section>
+        <section id="faq">
+            <h2>Frequently Asked Questions</h2>
 
-        <section id="contact">
-            <h2>Contact</h2>
-            <p>For questions or suggestions, open an issue on GitHub.</p>
-        </section>
-    </main>
+            <h3>Why build this when docker-compose exists?</h3>
+            <p>This is primarily a learning project. The goal is to understand how deployment automation works at a low level, not to replace production-ready tools. Building from scratch in C provides insights into systems programming, process management, and DevOps fundamentals that using existing tools wouldn't provide.</p>
 
-    <footer>
-        <p>Documentation generated from README.md | Last updated: 2024</p>
-    </footer>
-</body>
-</html>
-```
+            <h3>Can I use this in production?</h3>
+            <p>No. This tool is in early development and not suitable for production use. It lacks proper error handling, security features, and testing. For production deployments, use established tools like docker-compose, Kubernetes, or Ansible.</p>
+
+            <h3>What happens if a deployment fails?</h3>
+            <p>Currently, the tool reports the error and exits. It does not automatically clean up
