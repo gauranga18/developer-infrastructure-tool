@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Infrastructure Tool - Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Developer Infrastructure Tool</h1>
+        <p>A lightweight CLI tool for automating deployment of Dockerized applications from Git repositories on Linux systems.</p>
+    </header>
+
+    <nav>
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#status">Project Status</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#structure">Project Structure</a></li>
+            <li><a href="#prerequisites">Prerequisites</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#usage">Usage</a></li>
+            <li><a href="#philosophy">Development Philosophy</a></li>
+            <li><a href="#limitations">Limitations</a></li>
+            <li><a href="#roadmap">Roadmap</a></li>
+            <li><a href="#contributing">Contributing</a></li>
+            <li><a href="#license">License</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="status">
+            <h2>Project Status</h2>
+            <p><strong>Early-stage (V1)</strong> - Active development. Core functionality is being implemented. Not production-ready.</p>
+        </section>
+
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>This project provides a command-line interface for deploying containerized applications with minimal configuration. The tool automates common DevOps tasks: cloning repositories, building Docker images, running containers, and tracking deployment state.</p>
+            <p>Built from scratch in C to understand low-level system interactions, process management, and infrastructure automation without relying on high-level frameworks.</p>
+        </section>
+
+        <section id="audience">
+            <h2>Target Audience</h2>
+            <ul>
+                <li>Linux users seeking lightweight deployment automation</li>
+                <li>DevOps beginners learning infrastructure concepts</li>
+                <li>Systems programming learners building practical tools</li>
+                <li>Students interested in real-world C applications</li>
+            </ul>
+        </section>
+
+        <section id="features">
+            <h2>Features</h2>
+            
+            <h3>Current (V1)</h3>
+            <ul>
+                <li>CLI argument parsing</li>
+                <li>Shell command execution via <code>system()</code></li>
+                <li>Exit code handling and error reporting</li>
+                <li>Modular C project structure</li>
+                <li>Basic logging framework</li>
+            </ul>
+
+            <h3>Planned</h3>
+            <ul>
+                <li>Git repository cloning and validation</li>
+                <li>Docker image building from Dockerfiles</li>
+                <li>Container lifecycle management (start, stop, restart)</li>
+                <li>Deployment state persistence (JSON-based)</li>
+                <li>Structured logging to file</li>
+                <li>Rollback to previous deployments</li>
+                <li>CI/CD configuration templates</li>
+                <li>Remote deployment via SSH</li>
+                <li>Multi-container orchestration</li>
+            </ul>
+        </section>
+
+        <section id="structure">
+            <h2>Project Structure</h2>
+            <pre>
+mytool/
+├── src/
+│   ├── main.c        # CLI entry point and argument parsing
+│   ├── deploy.c      # Deployment orchestration logic
+│   ├── deploy.h      # Deployment function declarations
+│   ├── utils.c       # Command execution and helper functions
+│   ├── utils.h       # Utility function declarations
+│   └── config.c      # Configuration file handling
+├── scripts/
+│   └── docker.sh     # Shell scripts for Docker operations
+├── state/
+│   └── deployments.json  # Deployment state tracking
+├── logs/
+│   └── mytool.log    # Application logs
+├── Makefile          # Build automation
+├── README.md
+└── .gitignore
+            </pre>
+        </section>
+
+        <section id="prerequisites">
+            <h2>Prerequisites</h2>
+            <ul>
+                <li>Linux operating system (Ubuntu 20.04+, Debian 11+, or similar)</li>
+                <li>GCC compiler (version 7.0 or higher)</li>
+                <li>Git (version 2.0+)</li>
+                <li>Docker (version 20.0+)</li>
+                <li>Make utility</li>
+            </ul>
+        </section>
+
+        <section id="installation">
+            <h2>Installation</h2>
+            
+            <h3>Building from Source</h3>
+            <p>Clone the repository:</p>
+            <pre><code>git clone https://github.com/yourusername/mytool.git
+cd mytool</code></pre>
+            
+            <p>Compile the project:</p>
+            <pre><code>make</code></pre>
+            <p>The binary will be created as <code>mytool</code> in the project root.</p>
+
+            <h3>Manual Compilation</h3>
+            <p>If Make is unavailable:</p>
+            <pre><code>gcc -o mytool src/main.c src/utils.c src/deploy.c -Wall -Wextra</code></pre>
+        </section>
+
+        <section id="usage">
+            <h2>Usage</h2>
+            
+            <h3>Basic Deployment</h3>
+            <p>Deploy an application from a Git repository:</p>
+            <pre><code>./mytool deploy https://github.com/user/app.git</code></pre>
+
+            <h3>Check Version</h3>
+            <pre><code>./mytool --version</code></pre>
+
+            <h3>Help</h3>
+            <pre><code>./mytool --help</code></pre>
+        </section>
+
+        <section id="philosophy">
+            <h2>Development Philosophy</h2>
+            
+            <h3>Why C?</h3>
+            <p>C provides direct access to system calls and process management without abstractions. This project uses C to:</p>
+            <ul>
+                <li>Understand memory management and resource allocation</li>
+                <li>Learn POSIX APIs and Linux system programming</li>
+                <li>Build skills in performance-critical infrastructure code</li>
+                <li>Gain experience with compiled languages in DevOps contexts</li>
+            </ul>
+
+            <h3>Why <code>system()</code> in V1?</h3>
+            <p>The current implementation uses <code>system()</code> for command execution as a pragmatic starting point. This allows rapid prototyping of core workflows before implementing proper process forking, piping, and signal handling with <code>fork()</code>, <code>exec()</code>, and related syscalls.</p>
+            <p>Future versions will replace <code>system()</code> with lower-level process management for better security, error handling, and control.</p>
+
+            <h3>Linux-First Approach</h3>
+            <p>The tool is designed for Linux environments where Docker and Git are standard. This focus allows deep integration with Linux-specific features without cross-platform complexity.</p>
+        </section>
+
+        <section id="limitations">
+            <h2>Limitations</h2>
+            <ul>
+                <li><strong>Early Development</strong>: Core features still under implementation</li>
+                <li><strong>Local Deployment Only</strong>: No remote server or cloud support yet</li>
+                <li><strong>No Kubernetes</strong>: Single-host Docker deployments only</li>
+                <li><strong>Limited Error Recovery</strong>: Basic error handling without sophisticated rollback</li>
+                <li><strong>Security</strong>: Uses <code>system()</code> which has security implications</li>
+                <li><strong>Not Production-Ready</strong>: Suitable for learning and experimentation only</li>
+            </ul>
+        </section>
+
+        <section id="roadmap">
+            <h2>Roadmap</h2>
+            
+            <h3>V1 (Current)</h3>
+            <ul>
+                <li>[x] CLI argument parser</li>
+                <li>[x] Command execution framework</li>
+                <li>[x] Git clone integration</li>
+                <li>[ ] Docker build automation</li>
+                <li>[ ] Container run/stop commands</li>
+            </ul>
+
+            <h3>V2</h3>
+            <ul>
+                <li>[ ] Deployment state persistence</li>
+                <li>[ ] Structured logging</li>
+                <li>[ ] Configuration file support</li>
+                <li>[ ] Environment variable management</li>
+                <li>[ ] Basic rollback functionality</li>
+            </ul>
+
+            <h3>V3</h3>
+            <ul>
+                <li>[ ] SSH-based remote deployment</li>
+                <li>[ ] Multi-container applications</li>
+                <li>[ ] Health check integration</li>
+                <li>[ ] CI/CD template generation</li>
+                <li>[ ] Replace <code>system()</code> with <code>fork()</code>/<code>exec()</code></li>
+            </ul>
+        </section>
+
+        <section id="contributing">
+            <h2>Contributing</h2>
+            <p>Contributions are welcome. This is a learning project, so beginner-friendly contributions are encouraged.</p>
+            
+            <h3>How to Contribute</h3>
+            <ol>
+                <li>Fork the repository</li>
+                <li>Create a feature branch (<code>git checkout -b feature/new-feature</code>)</li>
+                <li>Make your changes with clear commit messages</li>
+                <li>Test thoroughly on Linux</li>
+                <li>Submit a pull request with description of changes</li>
+            </ol>
+
+            <h3>Coding Standards</h3>
+            <ul>
+                <li>Follow Linux kernel coding style</li>
+                <li>Use meaningful variable names</li>
+                <li>Comment complex logic</li>
+                <li>Handle errors explicitly</li>
+                <li>Avoid memory leaks (use <code>valgrind</code> for testing)</li>
+            </ul>
+        </section>
+
+        <section id="license">
+            <h2>License</h2>
+            <p>MIT License</p>
+            <p>Copyright (c) 2024</p>
+            <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+            <p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+            <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+        </section>
+
+        <section id="contact">
+            <h2>Contact</h2>
+            <p>For questions or suggestions, open an issue on GitHub.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>Documentation generated from README.md | Last updated: 2024</p>
+    </footer>
+</body>
+</html>
+```
