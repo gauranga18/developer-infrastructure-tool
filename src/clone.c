@@ -16,6 +16,5 @@ int clone_project(const char *repo_url){
         return 1;
     }
     printf("Repository cloned successfully from URL: %s\n", repo_url);
-
     return 0;
 }
