@@ -1,198 +1,159 @@
-<div align="center">
+# Developer Infrastructure Tool
 
-# 🚀 Developer Infrastructure Tool
+A lightweight CLI tool for automating deployment of Dockerized applications from Git repositories on Linux systems. Written in C for learning systems programming, Linux internals, and DevOps workflows.
 
-### Lightweight CLI for Automating Dockerized Deployments
+## Project Status
 
-*A systems programming journey into DevOps automation*
+**Early-stage (V1)** - Active development. Core functionality is being implemented. Not production-ready.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Status](https://img.shields.io/badge/status-early--stage-yellow)](https://github.com)
-[![Platform](https://img.shields.io/badge/platform-linux-lightgrey)](https://github.com)
+## Overview
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Roadmap](#-roadmap) • [Contributing](#-contributing)
+This project provides a command-line interface for deploying containerized applications with minimal configuration. The tool automates common DevOps tasks: cloning repositories, building Docker images, running containers, and tracking deployment state.
 
-</div>
+Built from scratch in C to understand low-level system interactions, process management, and infrastructure automation without relying on high-level frameworks.
 
----
+## Target Audience
 
-## 📖 Overview
+- Linux users seeking lightweight deployment automation
+- DevOps beginners learning infrastructure concepts
+- Systems programming learners building practical tools
+- Students interested in real-world C applications
 
-A command-line interface built from scratch in **C** for deploying containerized applications with minimal configuration. This tool automates the heavy lifting of modern DevOps workflows—cloning repositories, building Docker images, managing containers, and tracking deployment state.
+## Features
 
-**Why this exists:** To deeply understand low-level system interactions, process management, and infrastructure automation without relying on high-level frameworks or abstractions.
+### Current (V1)
 
-> **⚠️ Project Status:** Early-stage (V1) - Active development. Core functionality is being implemented. **Not production-ready.**
+- CLI argument parsing
+- Shell command execution via `system()`
+- Exit code handling and error reporting
+- Modular C project structure
+- Basic logging framework
 
----
+### Planned
 
-## 🎯 Who Is This For?
+- Git repository cloning and validation
+- Docker image building from Dockerfiles
+- Container lifecycle management (start, stop, restart)
+- Deployment state persistence (JSON-based)
+- Structured logging to file
+- Rollback to previous deployments
+- CI/CD configuration templates
+- Remote deployment via SSH
+- Multi-container orchestration
 
-| Audience | What You'll Gain |
-|----------|------------------|
-| 🐧 **Linux Users** | Lightweight deployment automation for your projects |
-| 🛠️ **DevOps Beginners** | Hands-on learning of infrastructure concepts |
-| 💻 **Systems Programmers** | Practical experience with low-level C development |
-| 🎓 **Students** | Real-world application of systems programming |
-
----
-
-## ✨ Features
-
-### **Currently Implemented** (V1)
-
-- ✅ Robust CLI argument parsing
-- ✅ Shell command execution via `system()`
-- ✅ Exit code handling and comprehensive error reporting
-- ✅ Modular, maintainable C project structure
-- ✅ Basic logging framework
-
-### **On the Horizon**
-
-- 🔄 Git repository cloning and validation
-- 🐳 Docker image building from Dockerfiles
-- 📦 Container lifecycle management (start, stop, restart)
-- 💾 Deployment state persistence (JSON-based)
-- 📝 Structured logging to file
-- ⏮️ Rollback to previous deployments
-- 🔧 CI/CD configuration templates
-- 🌐 Remote deployment via SSH
-- 🎼 Multi-container orchestration
-
----
-
-## 📁 Project Structure
-
+## Project Structure
 ```
 mytool/
-├── 📂 src/
-│   ├── main.c          # CLI entry point and argument parsing
-│   ├── deploy.c        # Deployment orchestration logic
-│   ├── deploy.h        # Deployment function declarations
-│   ├── utils.c         # Command execution and helper functions
-│   ├── utils.h         # Utility function declarations
-│   └── config.c        # Configuration file handling
-├── 📂 scripts/
-│   └── docker.sh       # Shell scripts for Docker operations
-├── 📂 state/
-│   └── deployments.json    # Deployment state tracking
-├── 📂 logs/
-│   └── mytool.log      # Application logs
-├── Makefile            # Build automation
-├── README.md           # You are here!
+├── src/
+│   ├── main.c        # CLI entry point and argument parsing
+│   ├── deploy.c      # Deployment orchestration logic
+│   ├── deploy.h      # Deployment function declarations
+│   ├── utils.c       # Command execution and helper functions
+│   ├── utils.h       # Utility function declarations
+│   └── config.c      # Configuration file handling
+├── scripts/
+│   └── docker.sh     # Shell scripts for Docker operations
+├── state/
+│   └── deployments.json  # Deployment state tracking
+├── logs/
+│   └── mytool.log    # Application logs
+├── Makefile          # Build automation
+├── README.md
 └── .gitignore
 ```
 
----
+## Prerequisites
 
-## 🔧 Prerequisites
+- Linux operating system (Ubuntu 20.04+, Debian 11+, or similar)
+- GCC compiler (version 7.0 or higher)
+- Git (version 2.0+)
+- Docker (version 20.0+)
+- Make utility
 
-Ensure your system has the following installed:
+## Installation
 
-| Requirement | Minimum Version | Purpose |
-|-------------|----------------|---------|
-| 🐧 **Linux** | Ubuntu 20.04+ / Debian 11+ | Operating system |
-| ⚙️ **GCC** | 7.0+ | C compiler |
-| 📦 **Git** | 2.0+ | Version control |
-| 🐳 **Docker** | 20.0+ | Containerization |
-| 🛠️ **Make** | Any recent | Build automation |
+### Building from Source
 
----
-
-## 📥 Installation
-
-### Quick Start
-
+Clone the repository:
 ```bash
-# Clone the repository
 git clone https://github.com/yourusername/mytool.git
 cd mytool
-
-# Build the project
-make
-
-# The binary 'mytool' is now ready to use!
 ```
+
+Compile the project:
+```bash
+make
+```
+
+The binary will be created as `mytool` in the project root.
 
 ### Manual Compilation
 
-If Make is unavailable on your system:
-
+If Make is unavailable:
 ```bash
 gcc -o mytool src/main.c src/utils.c src/deploy.c -Wall -Wextra
 ```
 
----
+## Usage
 
-## 🚀 Usage
+### Basic Deployment
 
-### Deploy an Application
-
+Deploy an application from a Git repository:
 ```bash
 ./mytool deploy https://github.com/user/app.git
 ```
 
 ### Check Version
-
 ```bash
 ./mytool --version
 ```
 
-### Get Help
-
+### Help
 ```bash
 ./mytool --help
 ```
 
----
-
-## 🤔 Development Philosophy
+## Development Philosophy
 
 ### Why C?
 
-C provides **unmediated access** to system calls and process management. This project leverages C to:
+C provides direct access to system calls and process management without abstractions. This project uses C to:
 
-- 🧠 Understand memory management and resource allocation
-- 🔍 Learn POSIX APIs and Linux system programming
-- ⚡ Build skills in performance-critical infrastructure code
-- 🎯 Gain experience with compiled languages in DevOps contexts
+- Understand memory management and resource allocation
+- Learn POSIX APIs and Linux system programming
+- Build skills in performance-critical infrastructure code
+- Gain experience with compiled languages in DevOps contexts
 
 ### Why `system()` in V1?
 
-The current implementation uses `system()` for command execution as a **pragmatic starting point**. This enables rapid prototyping of core workflows before implementing proper process forking, piping, and signal handling with `fork()`, `exec()`, and related syscalls.
+The current implementation uses `system()` for command execution as a pragmatic starting point. This allows rapid prototyping of core workflows before implementing proper process forking, piping, and signal handling with `fork()`, `exec()`, and related syscalls.
 
-> **Future versions** will replace `system()` with lower-level process management for enhanced security, error handling, and control.
+Future versions will replace `system()` with lower-level process management for better security, error handling, and control.
 
 ### Linux-First Approach
 
-Designed exclusively for Linux environments where Docker and Git are standard tools. This focus enables deep integration with Linux-specific features without cross-platform complexity.
+The tool is designed for Linux environments where Docker and Git are standard. This focus allows deep integration with Linux-specific features without cross-platform complexity.
 
----
+## Limitations
 
-## ⚠️ Current Limitations
+- **Early Development**: Core features still under implementation
+- **Local Deployment Only**: No remote server or cloud support yet
+- **No Kubernetes**: Single-host Docker deployments only
+- **Limited Error Recovery**: Basic error handling without sophisticated rollback
+- **Security**: Uses `system()` which has security implications
+- **Not Production-Ready**: Suitable for learning and experimentation only
 
-| Limitation | Impact |
-|------------|--------|
-| 🚧 **Early Development** | Core features still under implementation |
-| 💻 **Local Only** | No remote server or cloud support yet |
-| ☸️ **No Kubernetes** | Single-host Docker deployments only |
-| 🔄 **Limited Recovery** | Basic error handling without sophisticated rollback |
-| 🔒 **Security Concerns** | Uses `system()` which has security implications |
-| ⚡ **Not Production-Ready** | Suitable for learning and experimentation only |
+## Roadmap
 
----
-
-## 🗺️ Roadmap
-
-### **V1** (Current Sprint)
+### V1 (Current)
 
 - [x] CLI argument parser
 - [x] Command execution framework
-- [ ] Git clone integration
+- [x] Git clone integration
 - [ ] Docker build automation
 - [ ] Container run/stop commands
 
-### **V2** (Next)
+### V2
 
 - [ ] Deployment state persistence
 - [ ] Structured logging
@@ -200,7 +161,7 @@ Designed exclusively for Linux environments where Docker and Git are standard to
 - [ ] Environment variable management
 - [ ] Basic rollback functionality
 
-### **V3** (Future)
+### V3
 
 - [ ] SSH-based remote deployment
 - [ ] Multi-container applications
@@ -208,33 +169,31 @@ Designed exclusively for Linux environments where Docker and Git are standard to
 - [ ] CI/CD template generation
 - [ ] Replace `system()` with `fork()`/`exec()`
 
----
+## Contributing
 
-## 🤝 Contributing
-
-Contributions are **warmly welcomed**! This is a learning project, so beginner-friendly contributions are especially encouraged.
+Contributions are welcome. This is a learning project, so beginner-friendly contributions are encouraged.
 
 ### How to Contribute
 
-1. 🍴 Fork the repository
-2. 🌿 Create a feature branch: `git checkout -b feature/new-feature`
-3. ✍️ Make your changes with clear commit messages
-4. ✅ Test thoroughly on Linux
-5. 📬 Submit a pull request with a description of changes
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/new-feature`)
+3. Make your changes with clear commit messages
+4. Test thoroughly on Linux
+5. Submit a pull request with description of changes
 
 ### Coding Standards
 
-- Follow **Linux kernel coding style**
+- Follow Linux kernel coding style
 - Use meaningful variable names
-- Comment complex logic thoroughly
+- Comment complex logic
 - Handle errors explicitly
 - Avoid memory leaks (use `valgrind` for testing)
 
----
+## License
 
-## 📄 License
+MIT License
 
-**MIT License** - Copyright (c) 2024
+Copyright (c) 2024
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -242,18 +201,6 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
----
+## Contact
 
-## 💬 Contact
-
-Have questions or suggestions? **[Open an issue](https://github.com/yourusername/mytool/issues)** on GitHub.
-
----
-
-<div align="center">
-
-**Built with ❤️ for the Linux and DevOps community**
-
-⭐ Star this repo if you find it helpful!
-
-</div>
+For questions or suggestions, open an issue on GitHub.
