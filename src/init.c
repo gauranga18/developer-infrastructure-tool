@@ -38,6 +38,17 @@ int init_project(const char *project_name){
         perror("mkdir build failed");
         return 1;
     }
+    snprintf(path, sizeof(path), "%s/.forge.yaml", project_name);
+    FILE *yaml = fopen(path, "w");
+    if(yaml == NULL){
+        perror(".forge.yaml failed to create");
+        return 1;
+    }
+    fprintf(yaml, 
+        "name: %s\n"
+        "version: 1\n"
+        "runtime: docker\n",
+        project_name);
     snprintf(path, sizeof(path), "%s/README.md", project_name);
     FILE *readme = fopen(path, "w");
     if(readme == NULL){
@@ -50,6 +61,7 @@ int init_project(const char *project_name){
         perror(".gitignore failed to create ");
         return 1;
     }
+    fclose(yaml);
     fclose(readme);
     fclose(gitignore);
     printf("Project '%s' initialized successfully! \n", project_name);

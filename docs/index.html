@@ -82,7 +82,7 @@ cd mytool
 make</code></pre>
 
             <h3>3. Run Your First Deployment</h3>
-            <pre><code>./mytool deploy https://github.com/user/sample-app.git</code></pre>
+            <pre><code>./forge deploy https://github.com/user/sample-app.git</code></pre>
 
             <p>That's it! The tool will clone the repository, build the Docker image, and start the container.</p>
         </section>
@@ -207,7 +207,7 @@ cd mytool</code></pre>
 
             <h3>Manual Compilation</h3>
             <p>If Make is unavailable:</p>
-            <pre><code>gcc -o mytool src/main.c src/utils.c src/deploy.c -Wall -Wextra</code></pre>
+            <pre><code>gcc -o forge src/main.c src/utils.c src/deploy.c -Wall -Wextra</code></pre>
 
             <h3>System-wide Installation (Optional)</h3>
             <pre><code>sudo cp mytool /usr/local/bin/
@@ -219,13 +219,13 @@ mytool --version  # Test installation</code></pre>
             
             <h3>Basic Deployment</h3>
             <p>Deploy an application from a Git repository:</p>
-            <pre><code>./mytool deploy https://github.com/user/app.git</code></pre>
+            <pre><code>./forge deploy https://github.com/user/app.git</code></pre>
 
             <h3>Check Version</h3>
-            <pre><code>./mytool --version</code></pre>
+            <pre><code>./forge --version</code></pre>
 
             <h3>Help</h3>
-            <pre><code>./mytool --help</code></pre>
+            <pre><code>./forge --help</code></pre>
         </section>
 
         <section id="examples">
@@ -233,7 +233,7 @@ mytool --version  # Test installation</code></pre>
             
             <h3>Example 1: Deploy a Simple Web App</h3>
             <pre><code># Deploy a Node.js app with Dockerfile in root
-./mytool deploy https://github.com/user/nodejs-app.git
+./forge deploy https://github.com/user/nodejs-app.git
 
 # The tool will:
 # 1. Clone the repository to /tmp/mytool-deployments/nodejs-app/
@@ -243,15 +243,15 @@ mytool --version  # Test installation</code></pre>
 
             <h3>Example 2: Deploy with Custom Port (Planned for V2)</h3>
             <pre><code># Expose container on port 3000
-./mytool deploy https://github.com/user/app.git --port 3000</code></pre>
+./forge deploy https://github.com/user/app.git --port 3000</code></pre>
 
             <h3>Example 3: Deploy with Custom Name (Planned for V2)</h3>
             <pre><code># Give deployment a memorable name
-./mytool deploy https://github.com/user/app.git --name my-production-app</code></pre>
+./forge deploy https://github.com/user/app.git --name my-production-app</code></pre>
 
             <h3>Example 4: List Active Deployments (Planned for V2)</h3>
             <pre><code># Show all running deployments
-./mytool list
+./forge list
 
 # Output:
 # NAME                  STATUS    PORT    IMAGE
@@ -260,11 +260,11 @@ mytool --version  # Test installation</code></pre>
 
             <h3>Example 5: Stop a Deployment (Planned for V2)</h3>
             <pre><code># Stop and remove a deployment
-./mytool stop my-production-app</code></pre>
+./forge stop my-production-app</code></pre>
 
             <h3>Example 6: View Deployment Logs (Planned for V2)</h3>
             <pre><code># Tail logs from a deployment
-./mytool logs my-production-app --follow</code></pre>
+./forge logs my-production-app --follow</code></pre>
         </section>
 
         <section id="commands">
@@ -274,7 +274,7 @@ mytool --version  # Test installation</code></pre>
             
             <h4>deploy</h4>
             <p>Deploy an application from a Git repository.</p>
-            <pre><code>./mytool deploy &lt;repository-url&gt;</code></pre>
+            <pre><code>./forge deploy &lt;repository-url&gt;</code></pre>
             <p><strong>Arguments:</strong></p>
             <ul>
                 <li><code>&lt;repository-url&gt;</code> - HTTPS or SSH Git repository URL</li>
@@ -289,33 +289,33 @@ mytool --version  # Test installation</code></pre>
 
             <h4>--version</h4>
             <p>Display version information.</p>
-            <pre><code>./mytool --version</code></pre>
+            <pre><code>./forge --version</code></pre>
 
             <h4>--help</h4>
             <p>Display help information.</p>
-            <pre><code>./mytool --help</code></pre>
+            <pre><code>./forge --help</code></pre>
 
             <h3>Planned Commands (V2+)</h3>
             
             <h4>list</h4>
             <p>List all deployments and their status.</p>
-            <pre><code>./mytool list [--all]</code></pre>
+            <pre><code>./forge list [--all]</code></pre>
 
             <h4>stop</h4>
             <p>Stop a running deployment.</p>
-            <pre><code>./mytool stop &lt;deployment-name&gt;</code></pre>
+            <pre><code>./forge stop &lt;deployment-name&gt;</code></pre>
 
             <h4>restart</h4>
             <p>Restart a deployment.</p>
-            <pre><code>./mytool restart &lt;deployment-name&gt;</code></pre>
+            <pre><code>./forge restart &lt;deployment-name&gt;</code></pre>
 
             <h4>logs</h4>
             <p>View deployment logs.</p>
-            <pre><code>./mytool logs &lt;deployment-name&gt; [--follow]</code></pre>
+            <pre><code>./forge logs &lt;deployment-name&gt; [--follow]</code></pre>
 
             <h4>rollback</h4>
             <p>Roll back to a previous deployment version.</p>
-            <pre><code>./mytool rollback &lt;deployment-name&gt;</code></pre>
+            <pre><code>./forge rollback &lt;deployment-name&gt;</code></pre>
         </section>
 
         <section id="troubleshooting">
@@ -436,7 +436,7 @@ sudo yum groupinstall "Development Tools"  # RHEL/CentOS</code></pre>
             <h3>Manual Testing</h3>
             <p>Test the tool with a sample repository:</p>
             <pre><code># Use a simple test repository
-./mytool deploy https://github.com/docker/getting-started.git
+./forge deploy https://github.com/docker/getting-started.git
 
 # Verify container is running
 docker ps
@@ -613,7 +613,7 @@ docker rm &lt;container-id&gt;</code></pre>
                 <li>[x] CLI argument parser</li>
                 <li>[x] Command execution framework</li>
                 <li>[x] Git clone integration</li>
-                <li>[ ] Docker build automation</li>
+                <li>[x] Docker build automation</li>
                 <li>[ ] Container run/stop commands</li>
             </ul>
 

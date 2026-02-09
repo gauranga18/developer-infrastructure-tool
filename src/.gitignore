@@ -1,0 +1,10 @@
+# Build artifacts
+*.o
+forge
+
+# Editor backups
+*~
+*.swp
+
+# OS junk
+.DS_Store
