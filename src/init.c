@@ -3,46 +3,47 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <stdlib.h>
-
+#include "log.h"
 #include "init.h"
+#include "exit_codes.h"
 int init_project(const char *project_name){
     if(project_name == NULL || strlen(project_name) == 0){
-        fprintf(stderr,"ERROR: Project name cannot be empty. \n");
-    return 1;
+        log_error("Project name cannot be empty.");
+    return EXIT_BAD_ARGS;
     }if(strchr(project_name, ' ') != NULL || strchr(project_name, '/') != NULL){
-        fprintf(stderr,"ERROR: Project name cannot contain spaces or slashes. \n");
-        return 1;
+        log_error("Project name cannot contain spaces or slashes.");
+        return EXIT_BAD_ARGS;
     }
     if(mkdir(project_name, 0755) != 0 ){
         if(errno == EEXIST){
-            fprintf(stderr, "ERROR: Directory '%s' already exists. \n", project_name);
-        return 1;
+            log_error("Directory '%s' already exists.", project_name);
+        return EXIT_GENERIC;
         }else{
-            perror("mkdir failed");
+            log_error("mkdir failed");
         }
-        return 1;
+        return EXIT_GENERIC;
     }
     char path[256];
     snprintf(path, sizeof(path), "%s/src", project_name);
     if(mkdir(path,0755) !=0){
-        perror("mkdir src failed ");
-        return 1;
+        log_error("mkdir src failed ");
+        return EXIT_GENERIC;
     }
     snprintf(path, sizeof(path), "%s/include", project_name);
     if(mkdir(path,0755) !=0){
-        perror("mkdir include failed ");
-        return 1;
+        log_error("mkdir include failed ");
+        return EXIT_GENERIC;
     }
     snprintf(path, sizeof(path), "%s/build", project_name);
     if(mkdir(path,0755) !=0){
-        perror("mkdir build failed");
-        return 1;
+        log_error("mkdir build failed");
+        return EXIT_GENERIC;
     }
     snprintf(path, sizeof(path), "%s/.forge.yaml", project_name);
     FILE *yaml = fopen(path, "w");
     if(yaml == NULL){
-        perror(".forge.yaml failed to create");
-        return 1;
+        log_error(".forge.yaml failed to create");
+        return EXIT_GENERIC;
     }
     fprintf(yaml, 
         "name: %s\n"
@@ -52,20 +53,20 @@ int init_project(const char *project_name){
     snprintf(path, sizeof(path), "%s/README.md", project_name);
     FILE *readme = fopen(path, "w");
     if(readme == NULL){
-        perror("README.md failed to create");
-        return 1;
+        log_error("README.md failed to create");
+        return EXIT_GENERIC;
     }
     snprintf(path, sizeof(path), "%s/.gitignore", project_name);
     FILE *gitignore = fopen(path, "w");
     if(gitignore == NULL){
-        perror(".gitignore failed to create ");
-        return 1;
+        log_error(".gitignore failed to create ");
+        return EXIT_GENERIC;
     }
     fclose(yaml);
     fclose(readme);
     fclose(gitignore);
-    printf("Project '%s' initialized successfully! \n", project_name);
+    log_info("Project '%s' initialized successfully! \n", project_name);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 

@@ -1,23 +1,23 @@
 #include <stdio.h>
 #include <string.h>
 #include "repo.h"
-
+#include "exit_codes.h"
 int repo_extract_name(
     const char *repo_url,
     char *out_name,
     size_t out_size
 ) {
     if (repo_url == NULL || strlen(repo_url) == 0) {
-        return 1;
+        return EXIT_GENERIC;
     }
 
     if (out_name == NULL || out_size == 0) {
-        return 1;
+        return EXIT_GENERIC;
     }
 
     const char *slash = strrchr(repo_url, '/');
     if (slash == NULL || *(slash + 1) == '\0') {
-        return 1;
+        return EXIT_GENERIC;
     }
 
     const char *repo_part = slash + 1;
@@ -29,11 +29,11 @@ int repo_extract_name(
     }
 
     if (name_length + 1 > out_size) {
-        return 1;
+        return EXIT_GENERIC;
     }
 
     memcpy(out_name, repo_part, name_length);
     out_name[name_length] = '\0';
 
-    return 0;
+    return EXIT_SUCCESS;
 }

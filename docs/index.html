@@ -1,676 +1,2013 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A lightweight CLI tool for automating deployment of Dockerized applications from Git repositories on Linux systems">
-    <meta name="keywords" content="CLI, Docker, deployment, DevOps, C programming, Linux, infrastructure automation">
-    <meta name="author" content="Developer Infrastructure Tool Team">
-    <title>Developer Infrastructure Tool - Documentation</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FORGE — Deploy containerized applications from Git with one command. Lightweight CLI built in C.">
+  <meta name="color-scheme" content="dark">
+  <title>FORGE — CLI Docker Deployment Tool</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,600;0,700;0,900;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ════════════════════════════════════════════
+       TOKENS
+    ════════════════════════════════════════════ */
+    :root {
+      --bg:           #080807;
+      --bg-2:         #0f0e0c;
+      --bg-3:         #161411;
+      --bg-4:         #1e1b17;
+      --bg-5:         #252118;
+      --border:       #2c2820;
+      --border-2:     #3d3830;
+      --forge:        #ff0000;
+      --forge-dim:    #7a2504;
+      --forge-glow:   rgba(232,71,10,0.12);
+      --forge-soft:   rgba(232,71,10,0.07);
+      --ember:        #ff6b35;
+      --ash:          #a89880;
+      --steel:        #6b6054;
+      --text:         #ede8e0;
+      --text-2:       #b5a898;
+      --text-3:       #6b6054;
+      --green:        #4ec94e;
+      --cyan:         #00ffff;
+      --yellow:       #e8b84a;
+      --font-display: 'Barlow Condensed', sans-serif;
+      --font-mono:    'JetBrains Mono', 'Cascadia Code', monospace;
+      --nav-h:        58px;
+      --sidebar-w:    240px;
+      --r:            4px;
+      --r-lg:         8px;
+      --ease:         cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* ════════════════════════════════════════════
+       RESET
+    ════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      line-height: 1.7;
+      overflow-x: hidden;
+      min-width: 320px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* CRT noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 9999;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    ::selection { background: var(--forge-glow); color: var(--forge); }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--forge-dim); }
+
+    a { color: var(--forge); text-decoration: none; transition: color 0.15s; }
+    a:hover { color: var(--ember); }
+    a:focus-visible { outline: 1px solid var(--forge); outline-offset: 3px; border-radius: 2px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+
+    /* ════════════════════════════════════════════
+       TOP NAV
+    ════════════════════════════════════════════ */
+    .top-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: var(--nav-h);
+      background: rgba(8,8,7,0.95);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 clamp(1rem, 4vw, 2rem);
+      gap: 1rem;
+    }
+
+    .nav-brand {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 3vw, 1.6rem);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+    .nav-brand:hover { color: var(--text); }
+    .brand-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px;
+      background: var(--forge);
+      border-radius: var(--r);
+      font-size: 0.75rem; font-weight: 900;
+      color: var(--bg);
+      letter-spacing: 0;
+      flex-shrink: 0;
+    }
+
+    .nav-right { display: flex; align-items: center; gap: 0.5rem; }
+    .nav-link {
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--text-2);
+      padding: 0.35rem 0.7rem; border-radius: var(--r);
+      transition: all 0.15s;
+      display: none;
+    }
+    @media (min-width: 640px) { .nav-link { display: block; } }
+    .nav-link:hover { color: var(--text); background: var(--bg-4); }
+    .nav-link.active { color: var(--forge); }
+
+    .nav-doc-btn {
+      font-family: var(--font-mono);
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--bg);
+      background: var(--forge);
+      padding: 0.38rem 0.85rem;
+      border-radius: var(--r);
+      border: none; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .nav-doc-btn:hover { background: var(--ember); color: var(--bg); }
+
+    .hamburger {
+      display: flex; flex-direction: column; gap: 4px;
+      background: none; border: 1px solid var(--border-2);
+      border-radius: var(--r); padding: 6px;
+      cursor: pointer;
+    }
+    .hamburger span { display: block; width: 16px; height: 2px; background: var(--text-2); transition: all 0.2s; }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4px,4px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4px,-4px); }
+    @media (min-width: 900px) { .hamburger { display: none; } }
+
+    /* ════════════════════════════════════════════
+       LAYOUT SHELL (sidebar + content)
+    ════════════════════════════════════════════ */
+    .page-shell {
+      display: flex;
+      padding-top: var(--nav-h);
+      min-height: 100vh;
+    }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      position: fixed;
+      top: var(--nav-h); left: 0; bottom: 0;
+      width: var(--sidebar-w);
+      background: var(--bg-2);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 1.5rem 0 2rem;
+      z-index: 90;
+      transform: translateX(-100%);
+      transition: transform 0.28s var(--ease);
+    }
+    .sidebar.open { transform: translateX(0); }
+    @media (min-width: 900px) {
+      .sidebar { transform: translateX(0); }
+    }
+
+    .sidebar-section { margin-bottom: 0.25rem; }
+    .sidebar-group-label {
+      font-size: 0.6rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--steel); padding: 0.9rem 1.25rem 0.35rem;
+      display: block;
+    }
+    .sidebar-link {
+      display: block;
+      font-size: 0.72rem; font-weight: 400;
+      color: var(--text-2);
+      padding: 0.32rem 1.25rem 0.32rem 1.5rem;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+      line-height: 1.4;
+      text-decoration: none;
+    }
+    .sidebar-link:hover { color: var(--text); border-left-color: var(--border-2); }
+    .sidebar-link.active { color: var(--forge); border-left-color: var(--forge); background: var(--forge-soft); }
+    .sidebar-link:focus-visible { outline: 1px solid var(--forge); outline-offset: -1px; }
+
+    /* Sidebar overlay on mobile */
+    .sidebar-overlay {
+      position: fixed; inset: 0; z-index: 89;
+      background: rgba(8,8,7,0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+    }
+    .sidebar-overlay.visible { display: block; }
+
+    /* ─── MAIN CONTENT ─── */
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      padding: 0;
+    }
+    @media (min-width: 900px) {
+      .main-content { margin-left: var(--sidebar-w); }
+    }
+
+    .section-outer {
+      padding: clamp(4rem, 8vw, 7rem) clamp(1.25rem, 5vw, 3rem);
+      max-width: 820px;
+    }
+    .section-outer.hero-outer {
+      max-width: 100%;
+      padding: 0;
+    }
+    .section-outer.wide { max-width: 900px; }
+
+    /* ════════════════════════════════════════════
+       HERO
+    ════════════════════════════════════════════ */
+    .hero {
+      min-height: calc(100vh - var(--nav-h));
+      display: flex; align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: clamp(3rem, 8vw, 6rem) clamp(1.25rem, 6vw, 4rem);
+    }
+
+    /* Grid + radial glow background */
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 50% 50%, rgba(232,71,10,0.06) 0%, transparent 70%),
+        linear-gradient(rgba(44,40,32,0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(44,40,32,0.3) 1px, transparent 1px);
+      background-size: auto, 60px 60px, 60px 60px;
+      mask-image: radial-gradient(ellipse 90% 100% at 50% 50%, black 30%, transparent 100%);
+      pointer-events: none;
+    }
+
+    /* Horizontal scanning line */
+    .hero::after {
+      content: '';
+      position: absolute; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--forge), transparent);
+      opacity: 0.3;
+      animation: scan 8s linear infinite;
+    }
+    @keyframes scan {
+      0%   { top: -1px; opacity: 0; }
+      5%   { opacity: 0.3; }
+      95%  { opacity: 0.3; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    .hero-inner {
+      position: relative; z-index: 1;
+      max-width: 860px;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--forge);
+      border: 1px solid var(--forge-dim);
+      background: var(--forge-soft);
+      padding: 0.25rem 0.75rem;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.5s ease both;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--forge);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(5rem, 18vw, 13rem);
+      font-weight: 900;
+      line-height: 0.88;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 0.15em;
+      animation: fadeUp 0.5s ease 0.1s both;
+      position: relative;
+    }
+    /* Forge glow effect on title */
+    .hero-title span {
+      position: relative;
+      display: inline-block;
+      color: transparent;
+      -webkit-text-stroke: 2px var(--forge);
+      text-shadow: 0 0 40px rgba(232,71,10,0.4), 0 0 80px rgba(232,71,10,0.15);
+      /* fallback for stroke */
+    }
+    @supports not (-webkit-text-stroke: 1px black) {
+      .hero-title span { color: var(--forge); }
+    }
+
+    .hero-sub {
+      font-family: var(--font-display);
+      font-size: clamp(1.1rem, 3vw, 1.8rem);
+      font-weight: 300;
+      letter-spacing: 0.06em;
+      color: var(--text-2);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.5s ease 0.2s both;
+    }
+
+    .hero-desc {
+      font-size: clamp(0.8rem, 1.5vw, 0.92rem);
+      color: var(--text-2);
+      max-width: 520px;
+      line-height: 1.85;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.5s ease 0.3s both;
+    }
+
+    .hero-actions {
+      display: flex; flex-wrap: wrap; gap: 0.75rem;
+      animation: fadeUp 0.5s ease 0.4s both;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: var(--forge);
+      padding: 0.7rem 1.4rem;
+      border-radius: var(--r);
+      border: 1px solid var(--forge);
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .btn-primary:hover {
+      background: var(--ember);
+      border-color: var(--ember);
+      color: var(--bg);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(232,71,10,0.3);
+    }
+
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem; font-weight: 500; letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-2);
+      background: none;
+      padding: 0.7rem 1.4rem;
+      border-radius: var(--r);
+      border: 1px solid var(--border-2);
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .btn-secondary:hover {
+      color: var(--text);
+      border-color: var(--steel);
+      background: var(--bg-4);
+    }
+
+    .hero-quick-cmd {
+      margin-top: 2.5rem;
+      display: inline-flex; align-items: center; gap: 0.75rem;
+      background: var(--bg-3);
+      border: 1px solid var(--border-2);
+      border-radius: var(--r-lg);
+      padding: 0.7rem 1rem;
+      animation: fadeUp 0.5s ease 0.5s both;
+    }
+    .hqc-prompt { color: var(--forge); font-size: 0.8rem; user-select: none; }
+    .hqc-cmd { font-size: 0.82rem; color: var(--text); }
+    .hqc-copy {
+      background: var(--forge-soft);
+      border: 1px solid var(--forge-dim);
+      color: var(--forge);
+      font-family: var(--font-mono);
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.22rem 0.55rem;
+      border-radius: var(--r);
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .hqc-copy:hover { background: var(--forge); color: var(--bg); border-color: var(--forge); }
+
+    .hero-stats {
+      display: flex; flex-wrap: wrap; gap: 2rem;
+      margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      animation: fadeUp 0.5s ease 0.6s both;
+    }
+    .stat-item {}
+    .stat-n {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 900;
+      color: var(--forge);
+      line-height: 1;
+      letter-spacing: -0.01em;
+    }
+    .stat-l {
+      font-size: 0.62rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--steel);
+      margin-top: 0.2rem;
+    }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ════════════════════════════════════════════
+       SECTION SHARED STYLES
+    ════════════════════════════════════════════ */
+    .doc-section {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-tag {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.6rem; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--forge);
+      margin-bottom: 0.65rem;
+    }
+    .section-tag::before { content: '§'; color: var(--forge-dim); }
+
+    h2.section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      line-height: 1;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+
+    h3.sub-title {
+      font-family: var(--font-display);
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      margin: 2.5rem 0 0.85rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    h3.sub-title::before {
+      content: '//';
+      color: var(--forge-dim);
+      font-size: 0.85em;
+    }
+
+    .prose {
+      font-size: clamp(0.8rem, 1.4vw, 0.88rem);
+      color: var(--text-2);
+      line-height: 1.85;
+      max-width: 680px;
+      margin-bottom: 1.5rem;
+    }
+    .prose strong { color: var(--text); font-weight: 700; }
+    .prose code {
+      font-size: 0.85em;
+      color: var(--forge);
+      background: var(--forge-soft);
+      border: 1px solid var(--forge-dim);
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+    .prose a { color: var(--forge); }
+    .prose a:hover { color: var(--ember); }
+
+    /* ════════════════════════════════════════════
+       FEATURES GRID
+    ════════════════════════════════════════════ */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      margin-top: 2rem;
+    }
+
+    .feat-card {
+      background: var(--bg-2);
+      padding: clamp(1.1rem, 3vw, 1.6rem);
+      transition: background 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feat-card:hover { background: var(--bg-3); }
+    .feat-card::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 0% 0%, var(--forge-soft), transparent 60%);
+      opacity: 0; transition: opacity 0.25s;
+      pointer-events: none;
+    }
+    .feat-card:hover::after { opacity: 1; }
+
+    .feat-icon {
+      font-family: var(--font-display);
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+      color: var(--forge); text-transform: uppercase;
+      border: 1px solid var(--forge-dim);
+      border-left: 2px solid var(--forge);
+      background: var(--bg-4);
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--r);
+      display: inline-block;
+      margin-bottom: 0.85rem;
+    }
+    .feat-name {
+      font-family: var(--font-display);
+      font-size: clamp(0.95rem, 2vw, 1.15rem);
+      font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text);
+      margin-bottom: 0.45rem;
+    }
+    .feat-desc {
+      font-size: 0.76rem; color: var(--text-2); line-height: 1.7;
+    }
+
+    /* ════════════════════════════════════════════
+       TERMINAL / CODE BLOCKS
+    ════════════════════════════════════════════ */
+    .terminal {
+      background: var(--bg);
+      border: 1px solid var(--border-2);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      margin: 1.25rem 0;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+    }
+
+    .terminal-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.55rem 1rem;
+      background: var(--bg-3);
+      border-bottom: 1px solid var(--border);
+      gap: 0.75rem;
+    }
+    .t-dots { display: flex; gap: 5px; }
+    .t-dots span {
+      width: 9px; height: 9px; border-radius: 50%;
+    }
+    .t-d1 { background: #ff5f57; opacity: 0.7; }
+    .t-d2 { background: #ffbd2e; opacity: 0.7; }
+    .t-d3 { background: #28c840; opacity: 0.7; }
+    .t-filename {
+      font-size: 0.65rem; color: var(--steel);
+      flex: 1; text-align: center;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .t-copy {
+      background: none;
+      border: 1px solid var(--border-2);
+      color: var(--steel);
+      font-family: var(--font-mono);
+      font-size: 0.6rem; font-weight: 600; letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.48rem;
+      border-radius: var(--r);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      min-width: 48px; text-align: center;
+    }
+    .t-copy:hover { color: var(--forge); border-color: var(--forge-dim); background: var(--forge-soft); }
+    .t-copy.ok { color: var(--green); border-color: #1a4a1a; background: rgba(78,201,78,0.08); }
+
+    .terminal pre {
+      padding: clamp(0.85rem, 2vw, 1.25rem);
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: clamp(0.7rem, 1.2vw, 0.82rem);
+      line-height: 1.8;
+      -webkit-overflow-scrolling: touch;
+    }
+    .terminal code { font-family: inherit; white-space: pre; }
+
+    /* Syntax colours */
+    .c-prompt  { color: var(--steel); user-select: none; }
+    .c-cmd     { color: var(--forge); }
+    .c-sub     { color: var(--ember); }
+    .c-arg     { color: var(--cyan); }
+    .c-flag    { color: var(--green); }
+    .c-str     { color: #8fbf6e; }
+    .c-comment { color: var(--steel); font-style: italic; }
+    .c-ok      { color: var(--green); }
+    .c-err     { color: #e84a4a; }
+    .c-info    { color: var(--text-2); font-style: italic; }
+    .c-key     { color: #c084fc; }
+    .c-num     { color: var(--yellow); }
+    .c-type    { color: var(--cyan); }
+
+    /* ════════════════════════════════════════════
+       COMMAND REFERENCE TABLE
+    ════════════════════════════════════════════ */
+    .cmd-table-wrap { overflow-x: auto; margin: 1.25rem 0; border-radius: var(--r-lg); }
+    .cmd-table {
+      width: 100%; min-width: 540px;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    .cmd-table thead th {
+      text-align: left;
+      padding: 0.6rem 1rem;
+      background: var(--bg-3);
+      color: var(--steel);
+      font-size: 0.6rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      border-bottom: 1px solid var(--border-2);
+    }
+    .cmd-table tbody td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-2);
+      vertical-align: top; line-height: 1.6;
+    }
+    .cmd-table tbody tr { transition: background 0.12s; }
+    .cmd-table tbody tr:hover { background: var(--bg-3); }
+    .cmd-table tbody tr:last-child td { border-bottom: none; }
+    .cmd-table td.col-cmd { color: var(--forge); font-weight: 700; white-space: nowrap; }
+    .cmd-table td code {
+      font-size: 0.78rem; color: var(--cyan);
+      background: rgba(62,207,207,0.07);
+      border: 1px solid rgba(62,207,207,0.15);
+      padding: 0.08rem 0.3rem; border-radius: 3px;
+      white-space: nowrap;
+    }
+    .cmd-table td .badge {
+      display: inline-block;
+      font-size: 0.58rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 0.1rem 0.4rem; border-radius: 100px;
+      margin-left: 0.3rem; vertical-align: middle;
+    }
+    .badge-req { background: rgba(232,71,10,0.12); color: var(--forge); border: 1px solid var(--forge-dim); }
+    .badge-opt { background: rgba(107,96,84,0.15); color: var(--steel); border: 1px solid var(--border-2); }
+
+    /* ════════════════════════════════════════════
+       CALLOUTS
+    ════════════════════════════════════════════ */
+    .callout {
+      display: flex; gap: 0.85rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: var(--r);
+      font-size: 0.79rem; line-height: 1.75;
+      margin: 1.1rem 0;
+    }
+    .callout-note { background: rgba(62,207,207,0.06); border: 1px solid rgba(62,207,207,0.18); color: #8dd8d8; }
+    .callout-warn { background: rgba(232,71,10,0.07); border: 1px solid rgba(232,71,10,0.2); color: #e8a07a; }
+    .callout-tip  { background: rgba(78,201,78,0.06); border: 1px solid rgba(78,201,78,0.18); color: #8dc98d; }
+    .callout-icon {
+      flex-shrink: 0; width: 18px; height: 18px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.62rem; font-weight: 900; margin-top: 1px;
+    }
+    .callout-note .callout-icon { background: rgba(62,207,207,0.15); color: var(--cyan); border: 1px solid rgba(62,207,207,0.3); }
+    .callout-warn .callout-icon { background: rgba(232,71,10,0.15); color: var(--forge); border: 1px solid var(--forge-dim); }
+    .callout-tip  .callout-icon { background: rgba(78,201,78,0.15); color: var(--green); border: 1px solid rgba(78,201,78,0.3); }
+
+    /* ════════════════════════════════════════════
+       ARCHITECTURE DIAGRAM
+    ════════════════════════════════════════════ */
+    .arch-flow {
+      display: flex; flex-direction: column; gap: 0;
+      margin: 1.5rem 0;
+      border: 1px solid var(--border-2);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+    }
+    .arch-step {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      align-items: stretch;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-2);
+      transition: background 0.15s;
+    }
+    .arch-step:last-child { border-bottom: none; }
+    .arch-step:hover { background: var(--bg-3); }
+    .arch-num {
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-3);
+      border-right: 1px solid var(--border);
+      font-family: var(--font-display);
+      font-size: 1.1rem; font-weight: 900;
+      color: var(--forge);
+      padding: 1rem 0;
+    }
+    .arch-body { padding: 1rem 1.25rem; }
+    .arch-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+    .arch-desc { font-size: 0.76rem; color: var(--text-2); line-height: 1.65; }
+    .arch-desc code {
+      font-size: 0.82em; color: var(--cyan);
+      background: rgba(62,207,207,0.08);
+      padding: 0.08em 0.28em; border-radius: 3px;
+    }
+
+    /* ════════════════════════════════════════════
+       FLAG/OPTION ROWS
+    ════════════════════════════════════════════ */
+    .flag-list { display: flex; flex-direction: column; gap: 1px; margin: 1rem 0; }
+    .flag-row {
+      display: grid;
+      grid-template-columns: minmax(160px, auto) 1fr;
+      gap: 1rem;
+      padding: 0.8rem 1rem;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      transition: background 0.12s;
+      align-items: start;
+    }
+    .flag-row:hover { background: var(--bg-3); }
+    .flag-name {
+      font-size: 0.78rem; font-weight: 700;
+      color: var(--forge); white-space: nowrap;
+    }
+    .flag-type {
+      font-size: 0.6rem; font-weight: 700;
+      color: var(--cyan); text-transform: uppercase; letter-spacing: 0.06em;
+      margin-left: 0.4rem;
+      opacity: 0.7;
+    }
+    .flag-desc { font-size: 0.76rem; color: var(--text-2); line-height: 1.65; }
+    .flag-default { font-size: 0.68rem; color: var(--steel); margin-top: 0.2rem; }
+
+    /* ════════════════════════════════════════════
+       USE CASES GRID
+    ════════════════════════════════════════════ */
+    .use-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .use-card {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 1.25rem;
+      transition: all 0.2s;
+    }
+    .use-card:hover {
+      border-color: var(--forge-dim);
+      background: var(--bg-3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .use-icon {
+      font-size: 1.3rem; margin-bottom: 0.6rem; display: block;
+      filter: saturate(0.7);
+    }
+    .use-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+    .use-desc { font-size: 0.74rem; color: var(--text-2); line-height: 1.65; }
+
+    /* ════════════════════════════════════════════
+       TECH STACK
+    ════════════════════════════════════════════ */
+    .tech-grid {
+      display: flex; flex-wrap: wrap; gap: 0.5rem;
+      margin-top: 1.25rem;
+    }
+    .tech-pill {
+      font-family: var(--font-display);
+      font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--text);
+      background: var(--bg-3);
+      border: 1px solid var(--border-2);
+      padding: 0.35rem 0.85rem;
+      border-radius: 100px;
+      transition: all 0.15s;
+    }
+    .tech-pill:hover {
+      border-color: var(--forge-dim);
+      color: var(--forge);
+      background: var(--forge-soft);
+    }
+
+    /* ════════════════════════════════════════════
+       FAQ ACCORDION
+    ════════════════════════════════════════════ */
+    .faq-list { display: flex; flex-direction: column; gap: 1px; margin-top: 1.5rem; }
+    .faq-item {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .faq-q {
+      width: 100%; text-align: left;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem;
+      padding: 0.95rem 1.1rem;
+      background: none; border: none; cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 0.8rem; font-weight: 500;
+      color: var(--text);
+      transition: color 0.15s;
+    }
+    .faq-q:hover { color: var(--forge); }
+    .faq-arrow {
+      flex-shrink: 0; width: 16px; height: 16px;
+      border: 1px solid var(--border-2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; color: var(--steel);
+      transition: all 0.25s;
+    }
+    .faq-item.open .faq-arrow {
+      transform: rotate(180deg);
+      border-color: var(--forge-dim);
+      color: var(--forge);
+      background: var(--forge-soft);
+    }
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.3s var(--ease), padding 0.2s;
+      font-size: 0.78rem; color: var(--text-2); line-height: 1.8;
+    }
+    .faq-item.open .faq-a { max-height: 300px; padding: 0 1.1rem 1rem; }
+    .faq-a code {
+      font-size: 0.85em; color: var(--forge);
+      background: var(--forge-soft); border: 1px solid var(--forge-dim);
+      padding: 0.08em 0.3em; border-radius: 3px;
+    }
+
+    /* ════════════════════════════════════════════
+       CTA BOX
+    ════════════════════════════════════════════ */
+    .cta-banner {
+      position: relative;
+      background: var(--bg-3);
+      border: 1px solid var(--border-2);
+      border-radius: var(--r-lg);
+      padding: clamp(2rem, 5vw, 3rem);
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+    .cta-banner::before {
+      content: 'FORGE';
+      position: absolute; right: -0.5rem; top: -1.5rem;
+      font-family: var(--font-display);
+      font-size: 8rem; font-weight: 900; line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: 1px var(--border-2);
+      pointer-events: none; user-select: none;
+      letter-spacing: -0.02em;
+    }
+    .cta-banner h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 900; text-transform: uppercase;
+      color: var(--text); margin-bottom: 0.5rem;
+      position: relative; z-index: 1;
+    }
+    .cta-banner p {
+      font-size: 0.82rem; color: var(--text-2);
+      max-width: 420px; line-height: 1.75;
+      margin-bottom: 1.5rem;
+      position: relative; z-index: 1;
+    }
+
+    /* ════════════════════════════════════════════
+       FOOTER
+    ════════════════════════════════════════════ */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem clamp(1.25rem, 5vw, 3rem);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 0.75rem;
+      background: var(--bg-2);
+    }
+    @media (min-width: 900px) {
+      .site-footer { margin-left: var(--sidebar-w); }
+    }
+    .footer-brand {
+      font-family: var(--font-display);
+      font-size: 0.95rem; font-weight: 900;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text);
+    }
+    .footer-brand span { color: var(--forge); }
+    .footer-links { display: flex; gap: 1rem; }
+    .footer-links a { font-size: 0.7rem; color: var(--steel); transition: color 0.15s; }
+    .footer-links a:hover { color: var(--forge); }
+    .footer-copy { font-size: 0.65rem; color: var(--steel); }
+
+    /* ════════════════════════════════════════════
+       TOAST
+    ════════════════════════════════════════════ */
+    #toast {
+      position: fixed; bottom: 1.5rem; left: 50%;
+      transform: translateX(-50%) translateY(calc(100% + 1.5rem));
+      background: var(--bg-3); border: 1px solid var(--border-2);
+      color: var(--text); font-size: 0.75rem;
+      padding: 0.5rem 1rem; border-radius: 100px;
+      z-index: 1000; pointer-events: none;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s;
+      opacity: 0; white-space: nowrap;
+      display: flex; align-items: center; gap: 0.4rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    #toast.ok { border-color: rgba(78,201,78,0.3); color: var(--green); }
+
+    /* ════════════════════════════════════════════
+       SCROLL PROGRESS
+    ════════════════════════════════════════════ */
+    #progress {
+      position: fixed; top: 0; left: 0;
+      height: 2px; width: 0%;
+      background: linear-gradient(90deg, var(--forge-dim), var(--forge), var(--ember));
+      z-index: 9998;
+      box-shadow: 0 0 6px rgba(232,71,10,0.5);
+      transition: width 0.1s linear;
+    }
+
+    /* ════════════════════════════════════════════
+       SKIP LINK
+    ════════════════════════════════════════════ */
+    .skip { position: absolute; top: -99px; left: 1rem; z-index: 9999;
+      background: var(--forge); color: var(--bg); padding: 0.5rem 1rem;
+      border-radius: var(--r); font-size: 0.8rem; font-weight: 700; }
+    .skip:focus { top: 0.5rem; }
+
+    /* ════════════════════════════════════════════
+       RESPONSIVE TWEAKS
+    ════════════════════════════════════════════ */
+    @media (max-width: 600px) {
+      .hero-title { font-size: clamp(4rem, 22vw, 7rem); }
+      .flag-row { grid-template-columns: 1fr; gap: 0.35rem; }
+      .arch-step { grid-template-columns: 36px 1fr; }
+    }
+    @media (max-height: 500px) and (orientation: landscape) {
+      .hero { min-height: auto; padding: 2rem clamp(1.25rem, 6vw, 4rem); }
+      .hero::after { display: none; }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Developer Infrastructure Tool</h1>
-        <p>A lightweight CLI tool for automating deployment of Dockerized applications from Git repositories on Linux systems.</p>
-    </header>
 
-    <nav>
-        <h2>Contents</h2>
-        <ul>
-            <li><a href="#overview">Overview</a></li>
-            <li><a href="#status">Project Status</a></li>
-            <li><a href="#quickstart">Quick Start</a></li>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#architecture">Architecture</a></li>
-            <li><a href="#structure">Project Structure</a></li>
-            <li><a href="#prerequisites">Prerequisites</a></li>
-            <li><a href="#installation">Installation</a></li>
-            <li><a href="#usage">Usage</a></li>
-            <li><a href="#examples">Examples</a></li>
-            <li><a href="#commands">Command Reference</a></li>
-            <li><a href="#troubleshooting">Troubleshooting</a></li>
-            <li><a href="#security">Security Considerations</a></li>
-            <li><a href="#testing">Testing</a></li>
-            <li><a href="#philosophy">Development Philosophy</a></li>
-            <li><a href="#comparison">Comparison with Similar Tools</a></li>
-            <li><a href="#limitations">Limitations</a></li>
-            <li><a href="#roadmap">Roadmap</a></li>
-            <li><a href="#faq">FAQ</a></li>
-            <li><a href="#contributing">Contributing</a></li>
-            <li><a href="#license">License</a></li>
-        </ul>
-    </nav>
-
-    <main>
-        <section id="status">
-            <h2>Project Status</h2>
-            <p><strong>Early-stage (V1)</strong> - Active development. Core functionality is being implemented. Not production-ready.</p>
-        </section>
-
-        <section id="overview">
-            <h2>Overview</h2>
-            <p>This project provides a command-line interface for deploying containerized applications with minimal configuration. The tool automates common DevOps tasks: cloning repositories, building Docker images, running containers, and tracking deployment state.</p>
-            <p>Built from scratch in C to understand low-level system interactions, process management, and infrastructure automation without relying on high-level frameworks.</p>
-            
-            <h3>Target Audience</h3>
-            <ul>
-                <li>Linux users seeking lightweight deployment automation</li>
-                <li>DevOps beginners learning infrastructure concepts</li>
-                <li>Systems programming learners building practical tools</li>
-                <li>Students interested in real-world C applications</li>
-            </ul>
-        </section>
-
-        <section id="quickstart">
-            <h2>Quick Start</h2>
-            <p>Get up and running in 5 minutes:</p>
-            
-            <h3>1. Install Dependencies</h3>
-            <pre><code># Ubuntu/Debian
-sudo apt update
-sudo apt install git gcc make docker.io
-
-# Start Docker
-sudo systemctl start docker
-sudo usermod -aG docker $USER  # Add yourself to docker group
-newgrp docker  # Activate group changes</code></pre>
-
-            <h3>2. Clone and Build</h3>
-            <pre><code>git clone https://github.com/yourusername/mytool.git
-cd mytool
-make</code></pre>
-
-            <h3>3. Run Your First Deployment</h3>
-            <pre><code>./forge deploy https://github.com/user/sample-app.git</code></pre>
-
-            <p>That's it! The tool will clone the repository, build the Docker image, and start the container.</p>
-        </section>
-
-        <section id="features">
-            <h2>Features</h2>
-            
-            <h3>Current (V1)</h3>
-            <ul>
-                <li>CLI argument parsing</li>
-                <li>Shell command execution via <code>system()</code></li>
-                <li>Exit code handling and error reporting</li>
-                <li>Modular C project structure</li>
-                <li>Basic logging framework</li>
-                <li>Git repository cloning</li>
-            </ul>
-
-            <h3>Planned</h3>
-            <ul>
-                <li>Docker image building from Dockerfiles</li>
-                <li>Container lifecycle management (start, stop, restart)</li>
-                <li>Deployment state persistence (JSON-based)</li>
-                <li>Structured logging to file</li>
-                <li>Rollback to previous deployments</li>
-                <li>CI/CD configuration templates</li>
-                <li>Remote deployment via SSH</li>
-                <li>Multi-container orchestration</li>
-            </ul>
-        </section>
-
-        <section id="architecture">
-            <h2>Architecture</h2>
-            
-            <h3>How It Works</h3>
-            <p>The tool follows a simple pipeline when you run a deployment:</p>
-            <pre>
-1. Parse CLI Arguments
-   ↓
-2. Validate Repository URL
-   ↓
-3. Clone Git Repository
-   ↓
-4. Detect Dockerfile
-   ↓
-5. Build Docker Image
-   ↓
-6. Run Container
-   ↓
-7. Save Deployment State
-   ↓
-8. Report Status
-            </pre>
-
-            <h3>Component Interaction</h3>
-            <p><strong>main.c</strong> → Entry point, parses arguments, routes commands</p>
-            <p><strong>deploy.c</strong> → Orchestrates deployment workflow, coordinates other modules</p>
-            <p><strong>utils.c</strong> → Executes system commands, handles errors, provides helper functions</p>
-            <p><strong>config.c</strong> → Manages configuration and state persistence (planned)</p>
-
-            <h3>Design Decisions</h3>
-            <ul>
-                <li><strong>No external dependencies</strong>: Uses only standard C library and POSIX APIs</li>
-                <li><strong>Shell-out approach</strong>: Leverages existing Git and Docker CLI tools rather than reimplementing their functionality</li>
-                <li><strong>Stateless by default</strong>: Each command is independent (state tracking planned for V2)</li>
-                <li><strong>JSON for state</strong>: Human-readable, widely supported format for deployment tracking</li>
-            </ul>
-        </section>
-
-        <section id="structure">
-            <h2>Project Structure</h2>
-            <pre>
-mytool/
-├── src/
-│   ├── main.c        # CLI entry point and argument parsing
-│   ├── deploy.c      # Deployment orchestration logic
-│   ├── deploy.h      # Deployment function declarations
-│   ├── utils.c       # Command execution and helper functions
-│   ├── utils.h       # Utility function declarations
-│   └── config.c      # Configuration file handling
-├── scripts/
-│   └── docker.sh     # Shell scripts for Docker operations
-├── state/
-│   └── deployments.json  # Deployment state tracking
-├── logs/
-│   └── mytool.log    # Application logs
-├── Makefile          # Build automation
-├── README.md
-└── .gitignore
-            </pre>
-        </section>
-
-        <section id="prerequisites">
-            <h2>Prerequisites</h2>
-            <p>The following tools are required and here's why:</p>
-            
-            <h3>Operating System</h3>
-            <p><strong>Linux</strong> (Ubuntu 20.04+, Debian 11+, or similar) - The tool uses POSIX-specific APIs and assumes Linux-style directory structures and command availability.</p>
-
-            <h3>Build Tools</h3>
-            <p><strong>GCC</strong> (version 7.0+) - C compiler for building the source code. Clang also works.</p>
-            <p><strong>Make</strong> - Build automation tool for compiling the project with proper flags and dependencies.</p>
-
-            <h3>Runtime Dependencies</h3>
-            <p><strong>Git</strong> (version 2.0+) - Required for cloning repositories. The tool shells out to git commands.</p>
-            <p><strong>Docker</strong> (version 20.0+) - Container runtime for building images and running containers. Docker must be installed and the Docker daemon must be running.</p>
-
-            <h3>Optional</h3>
-            <p><strong>Valgrind</strong> - Memory leak detection for development and testing.</p>
-        </section>
-
-        <section id="installation">
-            <h2>Installation</h2>
-            
-            <h3>Building from Source</h3>
-            <p>Clone the repository:</p>
-            <pre><code>git clone https://github.com/yourusername/mytool.git
-cd mytool</code></pre>
-            
-            <p>Compile the project:</p>
-            <pre><code>make</code></pre>
-            <p>The binary will be created as <code>mytool</code> in the project root.</p>
-
-            <h3>Manual Compilation</h3>
-            <p>If Make is unavailable:</p>
-            <pre><code>gcc -o forge src/main.c src/utils.c src/deploy.c -Wall -Wextra</code></pre>
-
-            <h3>System-wide Installation (Optional)</h3>
-            <pre><code>sudo cp mytool /usr/local/bin/
-mytool --version  # Test installation</code></pre>
-        </section>
-
-        <section id="usage">
-            <h2>Usage</h2>
-            
-            <h3>Basic Deployment</h3>
-            <p>Deploy an application from a Git repository:</p>
-            <pre><code>./forge deploy https://github.com/user/app.git</code></pre>
-
-            <h3>Check Version</h3>
-            <pre><code>./forge --version</code></pre>
-
-            <h3>Help</h3>
-            <pre><code>./forge --help</code></pre>
-        </section>
-
-        <section id="examples">
-            <h2>Examples</h2>
-            
-            <h3>Example 1: Deploy a Simple Web App</h3>
-            <pre><code># Deploy a Node.js app with Dockerfile in root
-./forge deploy https://github.com/user/nodejs-app.git
-
-# The tool will:
-# 1. Clone the repository to /tmp/mytool-deployments/nodejs-app/
-# 2. Build Docker image tagged as 'nodejs-app:latest'
-# 3. Run container on default port (usually 80 or 8080)
-# 4. Display container ID and status</code></pre>
-
-            <h3>Example 2: Deploy with Custom Port (Planned for V2)</h3>
-            <pre><code># Expose container on port 3000
-./forge deploy https://github.com/user/app.git --port 3000</code></pre>
-
-            <h3>Example 3: Deploy with Custom Name (Planned for V2)</h3>
-            <pre><code># Give deployment a memorable name
-./forge deploy https://github.com/user/app.git --name my-production-app</code></pre>
-
-            <h3>Example 4: List Active Deployments (Planned for V2)</h3>
-            <pre><code># Show all running deployments
-./forge list
-
-# Output:
-# NAME                  STATUS    PORT    IMAGE
-# my-production-app     running   8080    app:latest
-# api-server            running   3000    api:latest</code></pre>
-
-            <h3>Example 5: Stop a Deployment (Planned for V2)</h3>
-            <pre><code># Stop and remove a deployment
-./forge stop my-production-app</code></pre>
-
-            <h3>Example 6: View Deployment Logs (Planned for V2)</h3>
-            <pre><code># Tail logs from a deployment
-./forge logs my-production-app --follow</code></pre>
-        </section>
-
-        <section id="commands">
-            <h2>Command Reference</h2>
-            
-            <h3>Current Commands</h3>
-            
-            <h4>deploy</h4>
-            <p>Deploy an application from a Git repository.</p>
-            <pre><code>./forge deploy &lt;repository-url&gt;</code></pre>
-            <p><strong>Arguments:</strong></p>
-            <ul>
-                <li><code>&lt;repository-url&gt;</code> - HTTPS or SSH Git repository URL</li>
-            </ul>
-            <p><strong>Exit Codes:</strong></p>
-            <ul>
-                <li>0 - Success</li>
-                <li>1 - General error</li>
-                <li>2 - Git clone failed</li>
-                <li>3 - Docker build failed</li>
-            </ul>
-
-            <h4>--version</h4>
-            <p>Display version information.</p>
-            <pre><code>./forge --version</code></pre>
-
-            <h4>--help</h4>
-            <p>Display help information.</p>
-            <pre><code>./forge --help</code></pre>
-
-            <h3>Planned Commands (V2+)</h3>
-            
-            <h4>list</h4>
-            <p>List all deployments and their status.</p>
-            <pre><code>./forge list [--all]</code></pre>
-
-            <h4>stop</h4>
-            <p>Stop a running deployment.</p>
-            <pre><code>./forge stop &lt;deployment-name&gt;</code></pre>
-
-            <h4>restart</h4>
-            <p>Restart a deployment.</p>
-            <pre><code>./forge restart &lt;deployment-name&gt;</code></pre>
-
-            <h4>logs</h4>
-            <p>View deployment logs.</p>
-            <pre><code>./forge logs &lt;deployment-name&gt; [--follow]</code></pre>
-
-            <h4>rollback</h4>
-            <p>Roll back to a previous deployment version.</p>
-            <pre><code>./forge rollback &lt;deployment-name&gt;</code></pre>
-        </section>
-
-        <section id="troubleshooting">
-            <h2>Troubleshooting</h2>
-            
-            <h3>Common Issues</h3>
-
-            <h4>Error: "Docker daemon not running"</h4>
-            <p><strong>Problem:</strong> Docker service is not started.</p>
-            <p><strong>Solution:</strong></p>
-            <pre><code>sudo systemctl start docker
-sudo systemctl enable docker  # Start on boot</code></pre>
-
-            <h4>Error: "Permission denied" when accessing Docker</h4>
-            <p><strong>Problem:</strong> User not in docker group.</p>
-            <p><strong>Solution:</strong></p>
-            <pre><code>sudo usermod -aG docker $USER
-newgrp docker  # Or log out and back in</code></pre>
-
-            <h4>Error: "Git clone failed: Authentication required"</h4>
-            <p><strong>Problem:</strong> Trying to clone private repository without credentials.</p>
-            <p><strong>Solution:</strong></p>
-            <ul>
-                <li>Use HTTPS with access token: <code>https://token@github.com/user/repo.git</code></li>
-                <li>Use SSH URL with configured SSH keys: <code>git@github.com:user/repo.git</code></li>
-                <li>Configure Git credentials helper</li>
-            </ul>
-
-            <h4>Error: "No Dockerfile found"</h4>
-            <p><strong>Problem:</strong> Repository doesn't contain a Dockerfile.</p>
-            <p><strong>Solution:</strong></p>
-            <ul>
-                <li>Ensure repository has a <code>Dockerfile</code> in the root directory</li>
-                <li>Check file name is exactly "Dockerfile" (case-sensitive)</li>
-            </ul>
-
-            <h4>Error: "Build failed" or "docker build" errors</h4>
-            <p><strong>Problem:</strong> Dockerfile has syntax errors or build dependencies missing.</p>
-            <p><strong>Solution:</strong></p>
-            <ul>
-                <li>Test Dockerfile manually: <code>docker build -t test .</code></li>
-                <li>Check Docker build logs for specific errors</li>
-                <li>Verify base image exists and is accessible</li>
-            </ul>
-
-            <h4>Error: "Port already in use"</h4>
-            <p><strong>Problem:</strong> Another container or process is using the port.</p>
-            <p><strong>Solution:</strong></p>
-            <pre><code># Find what's using the port
-sudo lsof -i :8080
-
-# Stop the conflicting container
-docker stop &lt;container-id&gt;</code></pre>
-
-            <h4>Compilation Error: "gcc: command not found"</h4>
-            <p><strong>Problem:</strong> GCC not installed.</p>
-            <p><strong>Solution:</strong></p>
-            <pre><code>sudo apt install build-essential  # Ubuntu/Debian
-sudo yum groupinstall "Development Tools"  # RHEL/CentOS</code></pre>
-
-            <h3>Getting More Help</h3>
-            <p>If you encounter an issue not listed here:</p>
-            <ol>
-                <li>Check the logs in <code>logs/mytool.log</code></li>
-                <li>Run commands with verbose output (if available)</li>
-                <li>Search existing issues on GitHub</li>
-                <li>Open a new issue with: error message, OS version, Docker version, steps to reproduce</li>
-            </ol>
-        </section>
-
-        <section id="security">
-            <h2>Security Considerations</h2>
-            
-            <h3>Current Security Limitations</h3>
-            
-            <h4>Use of system() Function</h4>
-            <p>The current implementation uses <code>system()</code> for command execution, which has security implications:</p>
-            <ul>
-                <li><strong>Shell injection risk</strong>: User input is passed to shell without proper sanitization</li>
-                <li><strong>Environment variable exposure</strong>: Inherits all environment variables</li>
-                <li><strong>Limited error handling</strong>: Difficult to capture specific error types</li>
-            </ul>
-            <p><strong>Mitigation:</strong> V3 will replace <code>system()</code> with <code>fork()</code>/<code>exec()</code> for direct process control.</p>
-
-            <h4>No Input Validation</h4>
-            <p>Repository URLs and other inputs are not thoroughly validated, potentially allowing malicious input.</p>
-            <p><strong>Mitigation:</strong> Add URL parsing and validation in V2.</p>
-
-            <h4>Running as Root</h4>
-            <p>If run with sudo, the tool operates with elevated privileges unnecessarily.</p>
-
-            <h3>Security Best Practices</h3>
-            
-            <h4>For Users</h4>
-            <ul>
-                <li><strong>Never run as root</strong>: Add user to docker group instead</li>
-                <li><strong>Only deploy trusted repositories</strong>: Malicious Dockerfiles can execute arbitrary code</li>
-                <li><strong>Review Dockerfiles</strong>: Before deploying, inspect the Dockerfile for suspicious commands</li>
-                <li><strong>Use private repositories carefully</strong>: Avoid embedding credentials in URLs</li>
-                <li><strong>Limit network exposure</strong>: Don't expose containers to the internet without proper security</li>
-            </ul>
-
-            <h4>For Contributors</h4>
-            <ul>
-                <li><strong>Sanitize inputs</strong>: Validate and escape all user-provided data</li>
-                <li><strong>Use safe functions</strong>: Prefer <code>fork()</code>/<code>exec()</code> over <code>system()</code></li>
-                <li><strong>Avoid buffer overflows</strong>: Use bounded string functions (<code>strncpy</code>, <code>snprintf</code>)</li>
-                <li><strong>Check return values</strong>: Handle all error conditions</li>
-            </ul>
-
-            <h3>Reporting Security Issues</h3>
-            <p>If you discover a security vulnerability, please email security@example.com instead of opening a public issue.</p>
-        </section>
-
-        <section id="testing">
-            <h2>Testing</h2>
-            
-            <h3>Manual Testing</h3>
-            <p>Test the tool with a sample repository:</p>
-            <pre><code># Use a simple test repository
-./forge deploy https://github.com/docker/getting-started.git
-
-# Verify container is running
-docker ps
-
-# Check logs
-docker logs &lt;container-id&gt;
-
-# Clean up
-docker stop &lt;container-id&gt;
-docker rm &lt;container-id&gt;</code></pre>
-
-            <h3>Memory Leak Testing</h3>
-            <p>Use Valgrind to check for memory leaks:</p>
-            <pre><code>valgrind --leak-check=full --show-leak-kinds=all ./mytool deploy https://github.com/user/app.git</code></pre>
-
-            <h3>Testing Your Contributions</h3>
-            <p>Before submitting a pull request:</p>
-            <ol>
-                <li><strong>Build with warnings</strong>: <code>make</code> should produce no warnings</li>
-                <li><strong>Test basic functionality</strong>: Run deploy command successfully</li>
-                <li><strong>Test error cases</strong>: Invalid URLs, missing Docker, permission errors</li>
-                <li><strong>Check for leaks</strong>: Run Valgrind to ensure no memory leaks</li>
-                <li><strong>Test on clean system</strong>: Verify on Ubuntu 20.04/22.04</li>
-            </ol>
-
-            <h3>Future Testing Plans</h3>
-            <ul>
-                <li>Unit tests for core functions</li>
-                <li>Integration tests with Docker containers</li>
-                <li>CI/CD pipeline with automated testing</li>
-                <li>Test coverage reporting</li>
-            </ul>
-        </section>
-
-        <section id="philosophy">
-            <h2>Development Philosophy</h2>
-            
-            <h3>Why C?</h3>
-            <p>C provides direct access to system calls and process management without abstractions. This project uses C to:</p>
-            <ul>
-                <li>Understand memory management and resource allocation</li>
-                <li>Learn POSIX APIs and Linux system programming</li>
-                <li>Build skills in performance-critical infrastructure code</li>
-                <li>Gain experience with compiled languages in DevOps contexts</li>
-            </ul>
-
-            <h3>Why <code>system()</code> in V1?</h3>
-            <p>The current implementation uses <code>system()</code> for command execution as a pragmatic starting point. This allows rapid prototyping of core workflows before implementing proper process forking, piping, and signal handling with <code>fork()</code>, <code>exec()</code>, and related syscalls.</p>
-            <p>Future versions will replace <code>system()</code> with lower-level process management for better security, error handling, and control.</p>
-
-            <h3>Linux-First Approach</h3>
-            <p>The tool is designed for Linux environments where Docker and Git are standard. This focus allows deep integration with Linux-specific features without cross-platform complexity.</p>
-
-            <h3>Learning-Oriented Design</h3>
-            <p>Every design decision prioritizes learning opportunities:</p>
-            <ul>
-                <li>Start simple, add complexity incrementally</li>
-                <li>Document why, not just what</li>
-                <li>Make the codebase approachable for beginners</li>
-                <li>Provide clear upgrade paths (V1 → V2 → V3)</li>
-            </ul>
-        </section>
-
-        <section id="comparison">
-            <h2>Comparison with Similar Tools</h2>
-            
-            <table border="1" cellpadding="10" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>Feature</th>
-                        <th>mytool</th>
-                        <th>docker-compose</th>
-                        <th>Ansible</th>
-                        <th>Bash Scripts</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Language</strong></td>
-                        <td>C</td>
-                        <td>Python</td>
-                        <td>Python</td>
-                        <td>Bash</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Configuration</strong></td>
-                        <td>Minimal/None</td>
-                        <td>YAML</td>
-                        <td>YAML</td>
-                        <td>Code</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Learning Curve</strong></td>
-                        <td>Easy</td>
-                        <td>Moderate</td>
-                        <td>Steep</td>
-                        <td>Easy</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Multi-container</strong></td>
-                        <td>Planned (V3)</td>
-                        <td>Yes</td>
-                        <td>Yes</td>
-                        <td>Manual</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Remote Deployment</strong></td>
-                        <td>Planned (V3)</td>
-                        <td>No</td>
-                        <td>Yes</td>
-                        <td>Yes (SSH)</td>
-                    </tr>
-                    <tr>
-                        <td><strong>State Management</strong></td>
-                        <td>Planned (V2)</td>
-                        <td>Yes</td>
-                        <td>Yes</td>
-                        <td>Manual</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Production Ready</strong></td>
-                        <td>No</td>
-                        <td>Yes</td>
-                        <td>Yes</td>
-                        <td>Depends</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Best For</strong></td>
-                        <td>Learning, simple deployments</td>
-                        <td>Multi-container apps</td>
-                        <td>Enterprise infrastructure</td>
-                        <td>Quick automation</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3>When to Use mytool</h3>
-            <ul>
-                <li>You're learning DevOps and want to understand the fundamentals</li>
-                <li>You need a lightweight solution for personal projects</li>
-                <li>You want to understand what tools like docker-compose do under the hood</li>
-                <li>You're learning C and systems programming</li>
-            </ul>
-
-            <h3>When to Use Alternatives</h3>
-            <ul>
-                <li><strong>docker-compose</strong>: For production multi-container applications with complex networking</li>
-                <li><strong>Ansible</strong>: For managing infrastructure at scale across multiple servers</li>
-                <li><strong>Bash scripts</strong>: For quick, one-off automation tasks</li>
-                <li><strong>Kubernetes</strong>: For container orchestration in production environments</li>
-            </ul>
-        </section>
-
-        <section id="limitations">
-            <h2>Limitations</h2>
-            <ul>
-                <li><strong>Early Development</strong>: Core features still under implementation</li>
-                <li><strong>Local Deployment Only</strong>: No remote server or cloud support yet</li>
-                <li><strong>Single Container</strong>: No multi-container orchestration</li>
-                <li><strong>No Kubernetes</strong>: Single-host Docker deployments only</li>
-                <li><strong>Limited Error Recovery</strong>: Basic error handling without sophisticated rollback</li>
-                <li><strong>Security</strong>: Uses <code>system()</code> which has security implications</li>
-                <li><strong>Not Production-Ready</strong>: Suitable for learning and experimentation only</li>
-                <li><strong>No Configuration File</strong>: All configuration via CLI arguments</li>
-                <li><strong>No Monitoring</strong>: No built-in health checks or monitoring</li>
-            </ul>
-        </section>
-
-        <section id="roadmap">
-            <h2>Roadmap</h2>
-            
-            <h3>V1 (Current - Q1 2025)</h3>
-            <ul>
-                <li>[x] CLI argument parser</li>
-                <li>[x] Command execution framework</li>
-                <li>[x] Git clone integration</li>
-                <li>[x] Docker build automation</li>
-                <li>[ ] Container run/stop commands</li>
-            </ul>
-
-            <h3>V2 (Q2 2025)</h3>
-            <ul>
-                <li>[ ] Deployment state persistence</li>
-                <li>[ ] Structured logging</li>
-                <li>[ ] Configuration file support</li>
-                <li>[ ] Environment variable management</li>
-                <li>[ ] Basic rollback functionality</li>
-                <li>[ ] List/status commands</li>
-            </ul>
-
-            <h3>V3 (Q3-Q4 2025)</h3>
-            <ul>
-                <li>[ ] SSH-based remote deployment</li>
-                <li>[ ] Multi-container applications</li>
-                <li>[ ] Health check integration</li>
-                <li>[ ] CI/CD template generation</li>
-                <li>[ ] Replace <code>system()</code> with <code>fork()</code>/<code>exec()</code></li>
-                <li>[ ] Container networking configuration</li>
-            </ul>
-
-            <h3>Future Considerations</h3>
-            <ul>
-                <li>Plugin system for extensibility</li>
-                <li>Web UI for deployment management</li>
-                <li>Integration with CI/CD platforms</li>
-                <li>Support for other container runtimes (Podman)</li>
-            </ul>
-        </section>
-
-        <section id="faq">
-            <h2>Frequently Asked Questions</h2>
-
-            <h3>Why build this when docker-compose exists?</h3>
-            <p>This is primarily a learning project. The goal is to understand how deployment automation works at a low level, not to replace production-ready tools. Building from scratch in C provides insights into systems programming, process management, and DevOps fundamentals that using existing tools wouldn't provide.</p>
-
-            <h3>Can I use this in production?</h3>
-            <p>No. This tool is in early development and not suitable for production use. It lacks proper error handling, security features, and testing. For production deployments, use established tools like docker-compose, Kubernetes, or Ansible.</p>
-
-            <h3>What happens if a deployment fails?</h3>
-        <p>Currently, the tool reports the error and exits. It does not automatically clean up intermediate resources (like cloned repositories or partially built Docker images).</p>
+<a class="skip" href="#main">Skip to content</a>
+<div id="progress" role="progressbar" aria-hidden="true"></div>
+
+<!-- ═══ TOP NAV ═══ -->
+<nav class="top-nav" aria-label="Main navigation">
+  <a href="#hero" class="nav-brand" aria-label="FORGE home">
+    <span class="brand-icon" aria-hidden="true">▲</span>
+    FORGE
+  </a>
+  <div class="nav-right">
+    <a href="#features"     class="nav-link">Features</a>
+    <a href="#installation" class="nav-link">Install</a>
+    <a href="#commands"     class="nav-link">Commands</a>
+    <a href="#architecture" class="nav-link">Internals</a>
+    <a href="https://github.com/gauranga18/forge" target="_blank" rel="noopener noreferrer" class="nav-doc-btn">GitHub ↗</a>
+    <button class="hamburger" id="hamburger" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar">
+      <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar" id="sidebar" aria-label="Documentation navigation">
+  <span class="sidebar-group-label">Getting Started</span>
+  <a class="sidebar-link" href="#hero">Introduction</a>
+  <a class="sidebar-link" href="#features">Why FORGE</a>
+  <a class="sidebar-link" href="#quickstart">Quick Start</a>
+  <a class="sidebar-link" href="#installation">Installation</a>
+
+  <span class="sidebar-group-label">Reference</span>
+  <a class="sidebar-link" href="#commands">Commands</a>
+  <a class="sidebar-link" href="#flags">Flags & Options</a>
+  <a class="sidebar-link" href="#examples">Examples</a>
+
+  <span class="sidebar-group-label">Internals</span>
+  <a class="sidebar-link" href="#architecture">Architecture</a>
+  <a class="sidebar-link" href="#source">Source Layout</a>
+
+  <span class="sidebar-group-label">More</span>
+  <a class="sidebar-link" href="#usecases">Use Cases</a>
+  <a class="sidebar-link" href="#tech">Built With</a>
+  <a class="sidebar-link" href="#faq">FAQ</a>
+</aside>
+
+<div class="sidebar-overlay" id="overlay" aria-hidden="true"></div>
+
+<!-- ═══ PAGE SHELL ═══ -->
+<div class="page-shell">
+  <main class="main-content" id="main" tabindex="-1">
+
+    <!-- ═══ HERO ═══ -->
+    <section class="doc-section" id="hero" aria-labelledby="hero-title">
+      <div class="hero">
+        <div class="hero-inner">
+          <div class="hero-badge">CLI · Docker · C Language</div>
+          <h1 class="hero-title" id="hero-title">
+            <span>FORGE</span>
+          </h1>
+          <p class="hero-sub">Lightweight Deployment CLI</p>
+          <p class="hero-desc">
+            Deploy containerized applications from any Git repository with a single command.
+            No YAML. No bloat. Written in C from scratch to understand deployment
+            pipelines from the ground up.
+          </p>
+          <div class="hero-actions">
+            <a href="#installation" class="btn-primary">Get Started →</a>
+            <a href="#commands"     class="btn-secondary">Command Reference</a>
+          </div>
+
+          <div class="hero-quick-cmd" role="group" aria-label="Quick start command">
+            <span class="hqc-prompt" aria-hidden="true">$</span>
+            <span class="hqc-cmd" id="hero-cmd">forge deploy https://github.com/user/app.git</span>
+            <button class="hqc-copy" onclick="copyText('forge deploy https://github.com/user/app.git', this)" aria-label="Copy command">Copy</button>
+          </div>
+
+          <div class="hero-stats" aria-label="Statistics">
+            <div class="stat-item"><div class="stat-n">1</div><div class="stat-l">Command to deploy</div></div>
+            <div class="stat-item"><div class="stat-n">0</div><div class="stat-l">Config files needed</div></div>
+            <div class="stat-item"><div class="stat-n">100%</div><div class="stat-l">Pure C code</div></div>
+            <div class="stat-item"><div class="stat-n">POSIX</div><div class="stat-l">Compatible</div></div>
+          </div>
+        </div>
+      </div>
     </section>
-    
-</main>
 
-<footer>
-    <p>&copy; 2025 Developer Infrastructure Tool Team</p>
-    <p>This tool is for educational purposes only.</p>
+    <!-- ═══ FEATURES ═══ -->
+    <section class="doc-section" id="features" aria-labelledby="features-title">
+      <div class="section-outer">
+        <span class="section-tag">Why FORGE</span>
+        <h2 class="section-title" id="features-title">Built Different</h2>
+        <p class="prose">
+          Most deployment tools are optimised for teams managing production infrastructure.
+          FORGE is optimised for <strong>understanding</strong>. It exposes the raw mechanics of
+          cloning, building, and running containers — and wraps them in a C program small enough
+          to read in an afternoon.
+        </p>
+        <div class="features-grid" role="list">
+          <div class="feat-card" role="listitem">
+            <div class="feat-icon">01 — CLI</div>
+            <div class="feat-name">CLI First</div>
+            <p class="feat-desc">One subcommand to clone, build, and start a container. No dashboards, no GUIs, no abstraction hiding what's actually happening.</p>
+          </div>
+          <div class="feat-card" role="listitem">
+            <div class="feat-icon">02 — Docker</div>
+            <div class="feat-name">Docker Native</div>
+            <p class="feat-desc">FORGE shells out to your existing Docker daemon. It doesn't reinvent container management — it just automates the repetitive commands you already know.</p>
+          </div>
+          <div class="feat-card" role="listitem">
+            <div class="feat-icon">03 — Zero config</div>
+            <div class="feat-name">Zero Config</div>
+            <p class="feat-desc">Pass a Git URL. FORGE infers the image name, build context, and container name from the repository. Sensible defaults you can always override with flags.</p>
+          </div>
+          <div class="feat-card" role="listitem">
+            <div class="feat-icon">04 — C</div>
+            <div class="feat-name">Written in C</div>
+            <p class="feat-desc">Pure ANSI C with POSIX extensions. No dependencies outside libc. The entire source compiles in under a second and fits in a single translation unit.</p>
+          </div>
+          <div class="feat-card" role="listitem">
+            <div class="feat-icon">05 — Learning</div>
+            <div class="feat-name">Pedagogical</div>
+            <p class="feat-desc">Every design decision prioritises clarity. Reading the source is the documentation. FORGE exists to be understood, not just used.</p>
+          </div>
+          <div class="feat-card" role="listitem">
+            <div class="feat-icon">06 — Lean</div>
+            <div class="feat-name">Minimal Footprint</div>
+            <p class="feat-desc">The compiled binary is a few dozen kilobytes. FORGE adds no runtime overhead; all the work is done by git and docker which you already have installed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ QUICK START ═══ -->
+    <section class="doc-section" id="quickstart" aria-labelledby="qs-title">
+      <div class="section-outer">
+        <span class="section-tag">Quick Start</span>
+        <h2 class="section-title" id="qs-title">Zero to Running</h2>
+        <p class="prose">
+          Three steps: install prerequisites, compile FORGE, deploy a repo.
+          No package manager, no runtime, no configuration file.
+        </p>
+
+        <h3 class="sub-title">Step 1 — Prerequisites</h3>
+        <p class="prose">You need <strong>git</strong>, <strong>docker</strong>, and a C compiler available on your PATH. That's it.</p>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">Verify prerequisites</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code><span class="c-prompt">$ </span><span class="c-cmd">git</span> <span class="c-flag">--version</span>
+<span class="c-info">git version 2.43.0</span>
+<span class="c-prompt">$ </span><span class="c-cmd">docker</span> <span class="c-flag">--version</span>
+<span class="c-info">Docker version 25.0.3, build 4debf41</span>
+<span class="c-prompt">$ </span><span class="c-cmd">gcc</span> <span class="c-flag">--version</span>
+<span class="c-info">gcc (Ubuntu 13.2.0) 13.2.0</span></code></pre>
+        </div>
+
+        <h3 class="sub-title">Step 2 — Build FORGE</h3>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">Build from source</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code><span class="c-prompt">$ </span><span class="c-cmd">git clone</span> <span class="c-str">https://github.com/gauranga18/forge.git</span>
+<span class="c-prompt">$ </span><span class="c-cmd">cd</span> forge
+<span class="c-prompt">$ </span><span class="c-cmd">make</span>
+<span class="c-ok">✓  forge compiled successfully (18 KB)</span></code></pre>
+        </div>
+
+        <h3 class="sub-title">Step 3 — Deploy</h3>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">Your first deploy</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code><span class="c-prompt">$ </span><span class="c-cmd">forge</span> <span class="c-sub">deploy</span> <span class="c-str">https://github.com/user/my-app.git</span>
+<span class="c-info">  Cloning  https://github.com/user/my-app.git ...</span>
+<span class="c-info">  Building my-app:latest ...</span>
+<span class="c-info">  Starting container my-app ...</span>
+<span class="c-ok">✓  my-app is running on port 8080</span></code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <span class="callout-icon" aria-hidden="true">✓</span>
+          <span>Add the compiled <code>forge</code> binary to a directory on your <code>PATH</code> (e.g. <code>/usr/local/bin</code>) so you can run it from anywhere.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ INSTALLATION ═══ -->
+    <section class="doc-section" id="installation" aria-labelledby="install-title">
+      <div class="section-outer">
+        <span class="section-tag">Installation</span>
+        <h2 class="section-title" id="install-title">Install FORGE</h2>
+        <p class="prose">
+          FORGE ships as source. You compile it once on your machine and get a standalone
+          native binary with no runtime dependencies.
+        </p>
+
+        <h3 class="sub-title">Linux / macOS</h3>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">Linux & macOS install</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code><span class="c-comment"># Clone and compile</span>
+<span class="c-prompt">$ </span><span class="c-cmd">git clone</span> <span class="c-str">https://github.com/gauranga18/forge.git</span> <span class="c-arg">~/forge</span>
+<span class="c-prompt">$ </span><span class="c-cmd">cd</span> ~/forge <span class="c-flag">&&</span> <span class="c-cmd">make</span>
+
+<span class="c-comment"># Optional: install system-wide</span>
+<span class="c-prompt">$ </span><span class="c-cmd">sudo cp</span> <span class="c-arg">forge</span> <span class="c-arg">/usr/local/bin/forge</span>
+<span class="c-prompt">$ </span><span class="c-cmd">forge</span> <span class="c-flag">--version</span>
+<span class="c-info">forge v1.0</span></code></pre>
+        </div>
+
+        <h3 class="sub-title">Windows (WSL2)</h3>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">WSL2 install</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code><span class="c-comment"># Inside a WSL2 Ubuntu shell</span>
+<span class="c-prompt">$ </span><span class="c-cmd">sudo apt-get install</span> <span class="c-flag">-y</span> <span class="c-arg">gcc make git docker.io</span>
+<span class="c-prompt">$ </span><span class="c-cmd">git clone</span> <span class="c-str">https://github.com/gauranga18/forge.git</span>
+<span class="c-prompt">$ </span><span class="c-cmd">cd</span> forge <span class="c-flag">&&</span> <span class="c-cmd">make</span>
+<span class="c-ok">✓  forge compiled successfully</span></code></pre>
+        </div>
+
+        <h3 class="sub-title">Manual Compile (no Make)</h3>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">Direct gcc compile</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code><span class="c-prompt">$ </span><span class="c-cmd">gcc</span> <span class="c-flag">-O2 -Wall -Wextra -pedantic</span> \
+      <span class="c-arg">src/forge.c</span> \
+      <span class="c-flag">-o</span> <span class="c-arg">forge</span></code></pre>
+        </div>
+
+        <div class="callout callout-note">
+          <span class="callout-icon" aria-hidden="true">i</span>
+          <span>Docker Engine must be running before you invoke <code>forge</code>. On macOS and Windows use Docker Desktop; on Linux start the daemon with <code>sudo systemctl start docker</code>.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ COMMANDS ═══ -->
+    <section class="doc-section" id="commands" aria-labelledby="cmd-title">
+      <div class="section-outer wide">
+        <span class="section-tag">Reference</span>
+        <h2 class="section-title" id="cmd-title">Commands</h2>
+        <p class="prose">
+          All FORGE functionality lives under a single binary. The first positional argument
+          is always the <strong>subcommand</strong>. Additional positional arguments and flags
+          follow.
+        </p>
+
+        <h3 class="sub-title">Syntax</h3>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">Usage pattern</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code>forge <span class="c-sub">&lt;subcommand&gt;</span> <span class="c-arg">[arguments]</span> <span class="c-flag">[flags]</span></code></pre>
+        </div>
+
+        <h3 class="sub-title">Subcommand Reference</h3>
+        <div class="cmd-table-wrap" role="region" aria-label="Command reference table">
+          <table class="cmd-table" aria-label="FORGE subcommands">
+            <thead>
+              <tr>
+                <th scope="col">Command</th>
+                <th scope="col">Argument</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-cmd">deploy</td>
+                <td><code>&lt;git-url&gt;</code> <span class="badge badge-req">required</span></td>
+                <td>Clone the repository, build a Docker image from its Dockerfile, and start a container. All three steps in one command.</td>
+              </tr>
+              <tr>
+                <td class="col-cmd">build</td>
+                <td><code>&lt;git-url&gt;</code> <span class="badge badge-req">required</span></td>
+                <td>Clone and build the Docker image only. Does not start a container. Useful for verifying a Dockerfile before deploying.</td>
+              </tr>
+              <tr>
+                <td class="col-cmd">run</td>
+                <td><code>&lt;image&gt;</code> <span class="badge badge-req">required</span></td>
+                <td>Start a container from a locally available image. Skips the clone and build steps.</td>
+              </tr>
+              <tr>
+                <td class="col-cmd">stop</td>
+                <td><code>&lt;name&gt;</code> <span class="badge badge-req">required</span></td>
+                <td>Stop a running container by name.</td>
+              </tr>
+              <tr>
+                <td class="col-cmd">rm</td>
+                <td><code>&lt;name&gt;</code> <span class="badge badge-req">required</span></td>
+                <td>Remove a stopped container. Use <code>--force</code> to remove a running container.</td>
+              </tr>
+              <tr>
+                <td class="col-cmd">logs</td>
+                <td><code>&lt;name&gt;</code> <span class="badge badge-req">required</span></td>
+                <td>Stream stdout/stderr logs from a running or stopped container.</td>
+              </tr>
+              <tr>
+                <td class="col-cmd">status</td>
+                <td><code>&lt;name&gt;</code> <span class="badge badge-opt">optional</span></td>
+                <td>Show the status of a named container, or list all containers managed by FORGE if no name is given.</td>
+              </tr>
+              <tr>
+                <td class="col-cmd">version</td>
+                <td>—</td>
+                <td>Print the FORGE version string and exit.</td>
+              </tr>
+              <tr>
+                <td class="col-cmd">help</td>
+                <td><code>[subcommand]</code> <span class="badge badge-opt">optional</span></td>
+                <td>Show help for FORGE or for a specific subcommand.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ FLAGS ═══ -->
+    <section class="doc-section" id="flags" aria-labelledby="flags-title">
+      <div class="section-outer">
+        <span class="section-tag">Reference</span>
+        <h2 class="section-title" id="flags-title">Flags &amp; Options</h2>
+        <p class="prose">
+          Flags are optional and always follow the subcommand and its required arguments.
+          Unrecognised flags cause FORGE to exit with a non-zero status and print usage.
+        </p>
+
+        <h3 class="sub-title">Global flags</h3>
+        <div class="flag-list" role="list">
+          <div class="flag-row" role="listitem">
+            <div>
+              <span class="flag-name">--version</span>
+              <span class="flag-type">bool</span>
+            </div>
+            <div>
+              <div class="flag-desc">Print version and exit.</div>
+            </div>
+          </div>
+          <div class="flag-row" role="listitem">
+            <div>
+              <span class="flag-name">--help, -h</span>
+              <span class="flag-type">bool</span>
+            </div>
+            <div>
+              <div class="flag-desc">Show help text. Pass a subcommand name for per-command help.</div>
+            </div>
+          </div>
+          <div class="flag-row" role="listitem">
+            <div>
+              <span class="flag-name">--verbose, -v</span>
+              <span class="flag-type">bool</span>
+            </div>
+            <div>
+              <div class="flag-desc">Print every shell command FORGE executes before running it. Useful for debugging and learning.</div>
+            </div>
+          </div>
+          <div class="flag-row" role="listitem">
+            <div>
+              <span class="flag-name">--dry-run</span>
+              <span class="flag-type">bool</span>
+            </div>
+            <div>
+              <div class="flag-desc">Print what FORGE would do without executing any commands. Implies <code>--verbose</code>.</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="sub-title">deploy / build flags</h3>
+        <div class="flag-list" role="list">
+          <div class="flag-row" role="listitem">
+            <div>
+              <span class="flag-name">--name &lt;str&gt;</span>
+              <span class="flag-type">string</span>
+            </div>
+            <div>
+              <div class="flag-desc">Override the auto-derived container and image name.</div>
+              <div class="flag-default">Default: last path segment of the git URL, stripped of <code>.git</code></div>
+            </div>
+          </div>
+          <div class="flag-row" role="listitem">
+            <div>
+              <span class="flag-name">--tag &lt;str&gt;</span>
+              <span class="flag-type">string</span>
+            </div>
+            <div>
+              <div class="flag-desc">Docker image tag to use when building.</div>
+              <div class="flag-default">Default: <code>latest</code></div>
+            </div>
+          </div>
+          <div class="flag-row" role="listitem">
+            <div>
+              <span class="flag-name">--port &lt;int&gt;</span>
+              <span class="flag-type">integer</span>
+            </div>
+            <div>
+              <div class="flag-desc">Host port to bind to the container's exposed port.</div>
+              <div class="flag-default">Default: <code>8080</code></div>
+            </div>
+          </div>
+          <div class="flag-row" role="listitem">
+            <div>
+              <span class="flag-name">--branch &lt;str&gt;</span>
+              <span class="flag-type">string</span>
+            </div>
+            <div>
+              <div class="flag-desc">Git branch, tag, or commit SHA to check out.</div>
+              <div class="flag-default">Default: repository default branch</div>
+            </div>
+          </div>
+          <div class="flag-row" role="listitem">
+            <div>
+              <span class="flag-name">--dir &lt;path&gt;</span>
+              <span class="flag-type">string</span>
+            </div>
+            <div>
+              <div class="flag-desc">Directory to clone into. Created if it does not exist.</div>
+              <div class="flag-default">Default: <code>/tmp/forge-&lt;name&gt;</code></div>
+            </div>
+          </div>
+          <div class="flag-row" role="listitem">
+            <div>
+              <span class="flag-name">--detach, -d</span>
+              <span class="flag-type">bool</span>
+            </div>
+            <div>
+              <div class="flag-desc">Run the container in the background. FORGE prints the container ID and exits.</div>
+              <div class="flag-default">Default: attached (foreground)</div>
+            </div>
+          </div>
+          <div class="flag-row" role="listitem">
+            <div>
+              <span class="flag-name">--force</span>
+              <span class="flag-type">bool</span>
+            </div>
+            <div>
+              <div class="flag-desc">Stop and remove a container with the same name before starting a new one.</div>
+            </div>
+          </div>
+          <div class="flag-row" role="listitem">
+            <div>
+              <span class="flag-name">--env KEY=VAL</span>
+              <span class="flag-type">string (repeatable)</span>
+            </div>
+            <div>
+              <div class="flag-desc">Pass an environment variable to the container. May be repeated for multiple variables.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ EXAMPLES ═══ -->
+    <section class="doc-section" id="examples" aria-labelledby="ex-title">
+      <div class="section-outer">
+        <span class="section-tag">Reference</span>
+        <h2 class="section-title" id="ex-title">Examples</h2>
+        <p class="prose">Real-world invocation patterns covering the most common workflows.</p>
+
+        <h3 class="sub-title">Deploy with custom port</h3>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">Deploy on port 3000</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code><span class="c-prompt">$ </span><span class="c-cmd">forge</span> <span class="c-sub">deploy</span> <span class="c-str">https://github.com/user/api.git</span> \
+    <span class="c-flag">--port</span> <span class="c-num">3000</span> \
+    <span class="c-flag">--detach</span></code></pre>
+        </div>
+
+        <h3 class="sub-title">Deploy a specific branch</h3>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">Branch deploy</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code><span class="c-prompt">$ </span><span class="c-cmd">forge</span> <span class="c-sub">deploy</span> <span class="c-str">https://github.com/user/app.git</span> \
+    <span class="c-flag">--branch</span> <span class="c-arg">staging</span> \
+    <span class="c-flag">--name</span>   <span class="c-arg">app-staging</span></code></pre>
+        </div>
+
+        <h3 class="sub-title">Passing environment variables</h3>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">Environment variables</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code><span class="c-prompt">$ </span><span class="c-cmd">forge</span> <span class="c-sub">deploy</span> <span class="c-str">https://github.com/user/web.git</span> \
+    <span class="c-flag">--env</span> <span class="c-arg">NODE_ENV=production</span> \
+    <span class="c-flag">--env</span> <span class="c-arg">DATABASE_URL=postgres://localhost/mydb</span></code></pre>
+        </div>
+
+        <h3 class="sub-title">Dry run to inspect actions</h3>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">Dry run output</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code><span class="c-prompt">$ </span><span class="c-cmd">forge</span> <span class="c-sub">deploy</span> <span class="c-str">https://github.com/user/app.git</span> <span class="c-flag">--dry-run</span>
+<span class="c-info">  [dry-run] git clone https://github.com/user/app.git /tmp/forge-app</span>
+<span class="c-info">  [dry-run] docker build -t app:latest /tmp/forge-app</span>
+<span class="c-info">  [dry-run] docker run -p 8080:8080 --name app app:latest</span>
+<span class="c-ok">✓  dry run complete — no changes made</span></code></pre>
+        </div>
+
+        <h3 class="sub-title">View logs and stop</h3>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">Container management</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code><span class="c-comment"># Stream logs</span>
+<span class="c-prompt">$ </span><span class="c-cmd">forge</span> <span class="c-sub">logs</span> <span class="c-arg">app</span>
+
+<span class="c-comment"># Stop the container</span>
+<span class="c-prompt">$ </span><span class="c-cmd">forge</span> <span class="c-sub">stop</span> <span class="c-arg">app</span>
+
+<span class="c-comment"># Remove it</span>
+<span class="c-prompt">$ </span><span class="c-cmd">forge</span> <span class="c-sub">rm</span> <span class="c-arg">app</span></code></pre>
+        </div>
+
+        <h3 class="sub-title">Redeploy (force replace)</h3>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">Force redeploy</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code><span class="c-comment"># Stop/remove existing container and redeploy</span>
+<span class="c-prompt">$ </span><span class="c-cmd">forge</span> <span class="c-sub">deploy</span> <span class="c-str">https://github.com/user/app.git</span> <span class="c-flag">--force</span>
+<span class="c-info">  Stopping existing container app ...</span>
+<span class="c-info">  Removing  container app ...</span>
+<span class="c-info">  Cloning   https://github.com/user/app.git ...</span>
+<span class="c-info">  Building  app:latest ...</span>
+<span class="c-info">  Starting  container app ...</span>
+<span class="c-ok">✓  app is running on port 8080</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ ARCHITECTURE ═══ -->
+    <section class="doc-section" id="architecture" aria-labelledby="arch-title">
+      <div class="section-outer">
+        <span class="section-tag">Internals</span>
+        <h2 class="section-title" id="arch-title">Architecture</h2>
+        <p class="prose">
+          FORGE follows a deliberately simple pipeline. Each subcommand maps to a small
+          C function that constructs a shell command string and hands it to <code>execvp()</code>
+          (or <code>popen()</code> where output capture is needed). There is no intermediate
+          representation, no plugin system, no async runtime.
+        </p>
+
+        <h3 class="sub-title">Deploy Pipeline</h3>
+        <div class="arch-flow" role="list">
+          <div class="arch-step" role="listitem">
+            <div class="arch-num">1</div>
+            <div class="arch-body">
+              <div class="arch-title">Argument Parsing</div>
+              <p class="arch-desc">A hand-written <code>parse_args()</code> function walks <code>argv</code> and populates a <code>ForgeConfig</code> struct. Unknown flags abort early with a usage message and exit code 1.</p>
+            </div>
+          </div>
+          <div class="arch-step" role="listitem">
+            <div class="arch-num">2</div>
+            <div class="arch-body">
+              <div class="arch-title">Name Derivation</div>
+              <p class="arch-desc">If <code>--name</code> was not provided, FORGE extracts the last path segment of the git URL, strips a trailing <code>.git</code>, and uses that as both image name and container name.</p>
+            </div>
+          </div>
+          <div class="arch-step" role="listitem">
+            <div class="arch-num">3</div>
+            <div class="arch-body">
+              <div class="arch-title">Git Clone</div>
+              <p class="arch-desc">FORGE calls <code>git clone [--branch &lt;b&gt;] &lt;url&gt; &lt;dir&gt;</code> via <code>execvp()</code>. The parent process waits for the child with <code>waitpid()</code> and checks the exit code.</p>
+            </div>
+          </div>
+          <div class="arch-step" role="listitem">
+            <div class="arch-num">4</div>
+            <div class="arch-body">
+              <div class="arch-title">Docker Build</div>
+              <p class="arch-desc">Calls <code>docker build -t &lt;name&gt;:&lt;tag&gt; &lt;dir&gt;</code>. Build output is piped to FORGE's stdout so you can see layers being processed in real time.</p>
+            </div>
+          </div>
+          <div class="arch-step" role="listitem">
+            <div class="arch-num">5</div>
+            <div class="arch-body">
+              <div class="arch-title">Docker Run</div>
+              <p class="arch-desc">Assembles a <code>docker run</code> command string from the parsed flags (<code>--port</code>, <code>--env</code>, <code>--detach</code>) and executes it. The container name is tracked in a local state file under <code>~/.forge/</code>.</p>
+            </div>
+          </div>
+          <div class="arch-step" role="listitem">
+            <div class="arch-num">6</div>
+            <div class="arch-body">
+              <div class="arch-title">State File</div>
+              <p class="arch-desc">A newline-delimited text file at <code>~/.forge/containers</code> records each container name managed by FORGE. The <code>status</code> and <code>rm</code> subcommands read this file to enumerate containers.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-note">
+          <span class="callout-icon" aria-hidden="true">i</span>
+          <span>Because FORGE simply shells out to <code>git</code> and <code>docker</code>, it inherits all their capabilities and limitations. Any valid Dockerfile works; any git transport protocol supported by your git installation works.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SOURCE LAYOUT ═══ -->
+    <section class="doc-section" id="source" aria-labelledby="source-title">
+      <div class="section-outer">
+        <span class="section-tag">Internals</span>
+        <h2 class="section-title" id="source-title">Source Layout</h2>
+        <p class="prose">
+          The entire implementation lives in a single C source file.
+          The project is structured so you can read it top-to-bottom as a tutorial.
+        </p>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dots"><span class="t-d1"></span><span class="t-d2"></span><span class="t-d3"></span></div>
+            <span class="t-filename">forge/ — project tree</span>
+            <button class="t-copy" onclick="copyBlock(this)" aria-label="Copy">Copy</button>
+          </div>
+          <pre><code><span class="c-type">forge/</span>
+├── <span class="c-arg">src/</span>
+│   └── <span class="c-str">forge.c</span>           <span class="c-comment"># entire implementation (~600 lines)</span>
+├── <span class="c-arg">Makefile</span>             <span class="c-comment"># default target: compile with -O2 -Wall</span>
+├── <span class="c-arg">README.md</span>
+└── <span class="c-arg">LICENSE</span>
+
+<span class="c-comment"># Runtime paths (created on first use)</span>
+<span class="c-type">~/.forge/</span>
+└── <span class="c-str">containers</span>           <span class="c-comment"># plain-text container registry</span></code></pre>
+        </div>
+
+        <h3 class="sub-title">Key C Functions</h3>
+        <div class="cmd-table-wrap" role="region" aria-label="Source function reference">
+          <table class="cmd-table" aria-label="Key source functions">
+            <thead>
+              <tr>
+                <th scope="col">Function</th>
+                <th scope="col">Signature</th>
+                <th scope="col">Responsibility</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-cmd">main</td>
+                <td><code>int main(int argc, char **argv)</code></td>
+                <td>Entry point. Routes to the correct subcommand handler.</td>
+              </tr>
+              <tr>
+                <td class="col-cmd">parse_args</td>
+                <td><code>ForgeConfig parse_args(int, char**)</code></td>
+                <td>Walks <code>argv</code> and fills a <code>ForgeConfig</code> struct. Prints usage on error.</td>
+              </tr>
+              <tr>
+                <td class="col-cmd">derive_name</td>
+                <td><code>char *derive_name(const char *url)</code></td>
+                <td>Extracts repo name from git URL. Strips trailing <code>.git</code>.</td>
+              </tr>
+              <tr>
+                <td class="col-cmd">run_cmd</td>
+                <td><code>int run_cmd(char *const argv[])</code></td>
+                <td>Fork-exec wrapper. Waits for child and returns exit code.</td>
+              </tr>
+              <tr>
+                <td class="col-cmd">cmd_deploy</td>
+                <td><code>int cmd_deploy(ForgeConfig *)</code></td>
+                <td>Orchestrates clone → build → run pipeline.</td>
+              </tr>
+              <tr>
+                <td class="col-cmd">state_add</td>
+                <td><code>void state_add(const char *name)</code></td>
+                <td>Appends a container name to <code>~/.forge/containers</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ USE CASES ═══ -->
+    <section class="doc-section" id="usecases" aria-labelledby="uc-title">
+      <div class="section-outer">
+        <span class="section-tag">Use Cases</span>
+        <h2 class="section-title" id="uc-title">Who Uses FORGE</h2>
+        <p class="prose">
+          FORGE targets developers who want to understand what deployment tools
+          actually do — not just use them as black boxes.
+        </p>
+        <div class="use-grid" role="list">
+          <div class="use-card" role="listitem">
+            <span class="use-icon" aria-hidden="true">🎓</span>
+            <div class="use-title">Learning</div>
+            <p class="use-desc">Trace every line of C source to understand how a deployment CLI actually invokes git and Docker under the hood.</p>
+          </div>
+          <div class="use-card" role="listitem">
+            <span class="use-icon" aria-hidden="true">⚡</span>
+            <div class="use-title">Quick deploys</div>
+            <p class="use-desc">Spin up personal projects and prototypes from any git URL without creating config files or memorising docker run options.</p>
+          </div>
+          <div class="use-card" role="listitem">
+            <span class="use-icon" aria-hidden="true">🔧</span>
+            <div class="use-title">DevOps practice</div>
+            <p class="use-desc">Learn infrastructure automation patterns — clone, build, run, log, stop, remove — with a tiny, auditable codebase.</p>
+          </div>
+          <div class="use-card" role="listitem">
+            <span class="use-icon" aria-hidden="true">🚀</span>
+            <div class="use-title">Local testing</div>
+            <p class="use-desc">Reproduce a cloud deployment locally. FORGE's <code>--dry-run</code> flag lets you inspect the exact commands before touching anything.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-warn" style="margin-top:1.75rem">
+          <span class="callout-icon" aria-hidden="true">!</span>
+          <span><strong>FORGE is not designed for production infrastructure.</strong> It has no secrets management, no rollback, and no health-check loop. Use Kubernetes, Nomad, or Docker Swarm for production workloads. FORGE is for learning and personal projects.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TECH STACK ═══ -->
+    <section class="doc-section" id="tech" aria-labelledby="tech-title">
+      <div class="section-outer">
+        <span class="section-tag">Built With</span>
+        <h2 class="section-title" id="tech-title">Tech Stack</h2>
+        <p class="prose">
+          FORGE has exactly zero library dependencies beyond what ships with
+          your operating system. The only tools required to build it are a
+          C compiler and Make.
+        </p>
+        <div class="tech-grid" role="list">
+          <span class="tech-pill" role="listitem">C (ANSI + POSIX)</span>
+          <span class="tech-pill" role="listitem">GCC / Clang</span>
+          <span class="tech-pill" role="listitem">Make</span>
+          <span class="tech-pill" role="listitem">Docker CLI</span>
+          <span class="tech-pill" role="listitem">Git</span>
+          <span class="tech-pill" role="listitem">fork(2)</span>
+          <span class="tech-pill" role="listitem">execvp(3)</span>
+          <span class="tech-pill" role="listitem">waitpid(2)</span>
+          <span class="tech-pill" role="listitem">popen(3)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ FAQ ═══ -->
+    <section class="doc-section" id="faq" aria-labelledby="faq-title">
+      <div class="section-outer">
+        <span class="section-tag">FAQ</span>
+        <h2 class="section-title" id="faq-title">Frequently Asked</h2>
+
+        <div class="faq-list" role="list">
+
+          <div class="faq-item" role="listitem">
+            <button class="faq-q" aria-expanded="false">
+              Does the repo need a Dockerfile?
+              <span class="faq-arrow" aria-hidden="true">▾</span>
+            </button>
+            <div class="faq-a" hidden>
+              Yes. FORGE calls <code>docker build</code> on the cloned directory and expects a
+              <code>Dockerfile</code> at the repository root. If none is found, Docker will exit with
+              an error and FORGE will propagate it.
+            </div>
+          </div>
+
+          <div class="faq-item" role="listitem">
+            <button class="faq-q" aria-expanded="false">
+              Can I deploy a private repository?
+              <span class="faq-arrow" aria-hidden="true">▾</span>
+            </button>
+            <div class="faq-a" hidden>
+              Yes. FORGE passes the URL verbatim to <code>git clone</code>.
+              If your git credentials (SSH keys, netrc, credential helpers) are configured,
+              private repos work automatically. FORGE itself does not handle authentication.
+            </div>
+          </div>
+
+          <div class="faq-item" role="listitem">
+            <button class="faq-q" aria-expanded="false">
+              What ports does FORGE expose?
+              <span class="faq-arrow" aria-hidden="true">▾</span>
+            </button>
+            <div class="faq-a" hidden>
+              By default FORGE maps host port <code>8080</code> to the container's exposed port.
+              Use <code>--port &lt;n&gt;</code> to choose a different host port. The container port is
+              whatever <code>EXPOSE</code> declares in the Dockerfile.
+            </div>
+          </div>
+
+          <div class="faq-item" role="listitem">
+            <button class="faq-q" aria-expanded="false">
+              Can I use FORGE on Windows without WSL?
+              <span class="faq-arrow" aria-hidden="true">▾</span>
+            </button>
+            <div class="faq-a" hidden>
+              Not currently. FORGE uses POSIX APIs (<code>fork</code>, <code>execvp</code>, <code>waitpid</code>)
+              that are not available on native Windows. WSL2 with Ubuntu is the recommended
+              path on Windows.
+            </div>
+          </div>
+
+          <div class="faq-item" role="listitem">
+            <button class="faq-q" aria-expanded="false">
+              Why C and not Python / Go / Rust?
+              <span class="faq-arrow" aria-hidden="true">▾</span>
+            </button>
+            <div class="faq-a" hidden>
+              FORGE is a learning project. C forces you to think explicitly about process creation,
+              file descriptors, and memory — exactly the concepts a systems programmer needs to internalise.
+              There is no technical reason you couldn't rewrite it in any other language; that's actually
+              a great exercise.
+            </div>
+          </div>
+
+          <div class="faq-item" role="listitem">
+            <button class="faq-q" aria-expanded="false">
+              How do I uninstall FORGE?
+              <span class="faq-arrow" aria-hidden="true">▾</span>
+            </button>
+            <div class="faq-a" hidden>
+              Delete the binary (<code>rm /usr/local/bin/forge</code>) and optionally remove
+              the state directory (<code>rm -rf ~/.forge</code>). FORGE creates no other files
+              on your system beyond what you explicitly point it at.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-banner" style="margin-top:3rem">
+          <h2>Ready to forge?</h2>
+          <p>Clone the repo, compile, and have your first container running in under two minutes.</p>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+            <a href="#installation" class="btn-primary">Install FORGE →</a>
+            <a href="https://github.com/gauranga18/forge" target="_blank" rel="noopener noreferrer" class="btn-secondary">View Source ↗</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="site-footer">
+  <div class="footer-brand"><span>FORGE</span> — v1.0</div>
+  <div class="footer-links">
+    <a href="#hero">Top</a>
+    <a href="#installation">Install</a>
+    <a href="#commands">Commands</a>
+    <a href="https://github.com/gauranga18/forge" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+  </div>
+  <div class="footer-copy">MIT License · Built in C</div>
 </footer>
-<!-- Back to Top Button -->
-<button id="backToTop" aria-label="Back to top">
-    ↑
-</button>
 
-<script src="script.js"></script>
+<!-- TOAST -->
+<div id="toast" role="status" aria-live="polite" aria-atomic="true">
+  <span id="toast-icon">✓</span>
+  <span id="toast-msg">Copied</span>
+</div>
 
+<script>
+'use strict';
+
+/* ─── SCROLL PROGRESS ─── */
+const prog = document.getElementById('progress');
+function updateProg() {
+  const h = document.documentElement;
+  const pct = (window.scrollY / (h.scrollHeight - h.clientHeight)) * 100;
+  prog.style.width = Math.min(100, pct) + '%';
+}
+window.addEventListener('scroll', updateProg, { passive: true });
+
+/* ─── TOAST ─── */
+let toastT;
+function showToast(msg, ok = true) {
+  clearTimeout(toastT);
+  const t = document.getElementById('toast');
+  document.getElementById('toast-icon').textContent = ok ? '✓' : '✗';
+  document.getElementById('toast-msg').textContent  = msg;
+  t.className = ok ? 'ok show' : 'show';
+  toastT = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ─── COPY HELPERS ─── */
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    if (btn) { const prev = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = prev, 2000); }
+    showToast('Copied to clipboard');
+  }).catch(() => showToast('Copy failed', false));
+}
+
+/* Extract code from a terminal block — strips only "$ " shell prompts */
+function copyBlock(btn) {
+  const pre = btn.closest('.terminal').querySelector('pre');
+  const text = pre.innerText
+    .split('\n')
+    .map(l => l.replace(/^\$ /, ''))   // remove shell prompt only
+    .join('\n')
+    .trim();
+  btn.disabled = true;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('ok');
+    showToast('Copied to clipboard');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('ok'); btn.disabled = false; }, 2000);
+  }).catch(() => {
+    btn.textContent = 'Error';
+    showToast('Copy failed', false);
+    setTimeout(() => { btn.textContent = 'Copy'; btn.disabled = false; }, 2000);
+  });
+}
+
+/* ─── HAMBURGER / SIDEBAR ─── */
+const hamburger = document.getElementById('hamburger');
+const sidebar   = document.getElementById('sidebar');
+const overlay   = document.getElementById('overlay');
+
+function openSidebar() {
+  sidebar.classList.add('open');
+  overlay.classList.add('visible');
+  overlay.setAttribute('aria-hidden', 'false');
+  hamburger.classList.add('open');
+  hamburger.setAttribute('aria-expanded', 'true');
+  hamburger.setAttribute('aria-label', 'Close navigation');
+}
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('visible');
+  overlay.setAttribute('aria-hidden', 'true');
+  hamburger.classList.remove('open');
+  hamburger.setAttribute('aria-expanded', 'false');
+  hamburger.setAttribute('aria-label', 'Open navigation');
+}
+
+hamburger.addEventListener('click', () =>
+  sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+overlay.addEventListener('click', closeSidebar);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+    closeSidebar(); hamburger.focus();
+  }
+});
+
+/* Close sidebar on link click on mobile */
+sidebar.querySelectorAll('.sidebar-link').forEach(a =>
+  a.addEventListener('click', () => {
+    if (window.innerWidth < 900) closeSidebar();
+  }));
+
+/* ─── ACTIVE SIDEBAR LINK ─── */
+const docSections = document.querySelectorAll('section[id]');
+const sideLinks   = document.querySelectorAll('.sidebar-link');
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      sideLinks.forEach(a => a.classList.remove('active'));
+      const link = document.querySelector(`.sidebar-link[href="#${e.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+docSections.forEach(s => observer.observe(s));
+
+/* ─── NAV LINK ACTIVE ─── */
+const navLinks = document.querySelectorAll('.nav-link');
+const navObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => a.classList.remove('active'));
+      const nl = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (nl) nl.classList.add('active');
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+docSections.forEach(s => navObs.observe(s));
+
+/* ─── FAQ ACCORDION ─── */
+document.querySelectorAll('.faq-item').forEach(item => {
+  const btn = item.querySelector('.faq-q');
+  const ans = item.querySelector('.faq-a');
+  btn.addEventListener('click', () => {
+    const open = item.classList.toggle('open');
+    btn.setAttribute('aria-expanded', String(open));
+    if (open) {
+      ans.removeAttribute('hidden');
+    } else {
+      // wait for transition before hiding
+      ans.addEventListener('transitionend', () => {
+        if (!item.classList.contains('open')) ans.setAttribute('hidden', '');
+      }, { once: true });
+    }
+  });
+});
+</script>
 </body>
 </html>

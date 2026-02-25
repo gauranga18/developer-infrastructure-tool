@@ -4,37 +4,39 @@
 #include "deploy.h"
 #include "clone.h"
 #include "repo.h"
+#include "log.h"
+#include "exit_codes.h"
 int deploy_repo(const char *repo_url, run_mode_t mode) {
     char project_name[128];
 
-    printf("Deploying repository from URL: %s\n", repo_url);
+    log_info("Deploying repository from URL: %s", repo_url);
 
     if (repo_extract_name(repo_url, project_name, sizeof(project_name)) != 0) {
-        fprintf(stderr, "ERROR: Failed to extract name from repo URL\n");
-        return 1;
+        log_error("Failed to extract name from repo URL");
+        return EXIT_GENERIC;
     }
 
-    printf("Project name detected: %s\n", project_name);
+    log_info("Project name detected: %s", project_name);
 
     if (clone_project(repo_url) != 0) {
-        return 1;
+        return EXIT_GENERIC;
     }
 
     if (chdir(project_name) != 0) {
-        perror("ERROR: Failed to enter project directory");
-        return 1;
+        log_error("Failed to enter project directory");
+        return EXIT_GENERIC;
     }
 
     if (access("Dockerfile", F_OK) == 0) {
-        printf("Dockerfile found, building docker image...\n");
+        log_info("Dockerfile found, building docker image...");
 
         if (system("docker build -t forge_app .") != 0) {
-            fprintf(stderr, "Docker build failed\n");
-            return 1;
+            log_error("Docker build failed");
+            return EXIT_GENERIC;
         }
 
-        printf("Docker image created successfully.\n");
-        printf("Running docker container...\n");
+        log_info("Docker image created successfully.");
+        log_info("Running docker container...");
 
         const char *run_cmd;
 
@@ -50,13 +52,13 @@ int deploy_repo(const char *repo_url, run_mode_t mode) {
         }
 
         if (system(run_cmd) != 0) {
-            fprintf(stderr, "ERROR: Failed to run docker container\n");
-            return 1;
+            log_error("Failed to run docker container");
+            return EXIT_GENERIC;
         }
 
-        return 0;   // ✅ correct exit after successful docker run
+        return 0;   //correct exit after successful docker run
     }
 
-    printf("No Dockerfile found. Deployment finished without containerization.\n");
-    return 0;
+    log_info("No Dockerfile found. Deployment finished without containerization.\n");
+    return EXIT_SUCCESS;
 }
