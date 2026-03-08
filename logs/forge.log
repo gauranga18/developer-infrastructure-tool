@@ -106,3 +106,25 @@
 [2026-02-26 01:24:27] INFO: Running: git clone https://github.com/gauranga18/Docker.git
 [2026-02-26 01:24:29] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
 
+[2026-02-27 22:55:50] INFO: Forge started
+[2026-03-01 16:33:13] INFO: Forge started
+[2026-03-01 16:33:13] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-01 16:33:13] INFO: Project name detected: Docker
+[2026-03-01 16:33:13] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-01 16:33:13] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-01 16:33:14] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-01 20:37:24] INFO: Forge started
+[2026-03-01 20:37:24] INFO: Deploying repository from URL: repo.git
+[2026-03-01 20:37:24] ERROR: Failed to extract name from repo URL
+[2026-03-08 11:48:24] INFO: Forge started
+[2026-03-08 11:48:24] ERROR: Unknown command '--version'
+[2026-03-08 11:48:24] INFO: Forge started
+[2026-03-08 11:48:24] INFO: Project 'test-project' initialized successfully!
+[2026-03-08 11:48:24] INFO: Forge started
+[2026-03-08 11:48:24] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 11:48:24] INFO: Project name detected: Docker
+[2026-03-08 11:48:24] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 11:48:24] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-08 11:48:26] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+

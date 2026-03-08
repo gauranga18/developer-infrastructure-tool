@@ -38,6 +38,8 @@ void load_config(void) {
 }
 
 int main(int argc, char *argv[]) {
+    // Call environment variable from config.c
+    load_env_defaults();
     // Load config FIRST
     load_config();
     
