@@ -6,6 +6,7 @@
 #include "repo.h"
 #include "log.h"
 #include "exit_codes.h"
+#include "utils.h"
 int deploy_repo(const char *repo_url, run_mode_t mode) {
     char project_name[128];
 
@@ -29,8 +30,8 @@ int deploy_repo(const char *repo_url, run_mode_t mode) {
 
     if (access("Dockerfile", F_OK) == 0) {
         log_info("Dockerfile found, building docker image...");
-
-        if (system("docker build -t forge_app .") != 0) {
+        const char *build_args[] = {"docker","build","-t","forge_app",".",NULL};
+        if(run_command_fork(build_args)!=0){
             log_error("Docker build failed");
             return EXIT_GENERIC;
         }
@@ -38,25 +39,33 @@ int deploy_repo(const char *repo_url, run_mode_t mode) {
         log_info("Docker image created successfully.");
         log_info("Running docker container...");
 
-        const char *run_cmd;
+        const char *run_args[20];
+        int i = 0;
+        run_args[i++] = "docker";
+        run_args[i++] = "run";
 
         switch (mode) {
             case RUN_INTERACTIVE:
-                run_cmd = "docker run -it forge_app";
+                run_args[i++] = "-it";
                 break;
             case RUN_DETACHED:
-                run_cmd = "docker run -d forge_app";
+                run_args[i++] = "-d";
                 break;
+            case RUN_DEFAULT:
             default:
-                run_cmd = "docker run forge_app";
+                break;
         }
+        // Add container name 
+        run_args[i++] = "--name";
+        run_args[i++] = project_name;
+        // Add image name 
+        run_args[i++] = "forge_app";
+        run_args[i] = NULL;
 
-        if (system(run_cmd) != 0) {
+        if(run_command_fork(run_args)!=0){
             log_error("Failed to run docker container");
             return EXIT_GENERIC;
         }
-
-        return 0;   //correct exit after successful docker run
     }
 
     log_info("No Dockerfile found. Deployment finished without containerization.\n");
