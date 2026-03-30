@@ -1,6 +1,8 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g
-OBJ = main.o utils.o deploy.o help.o config.o clone.o init.o build-path-deployment.o prepare-deploy-workspace.o repo.o log.o state.o
+OBJ = main.o utils.o deploy.o help.o config.o clone.o init.o \
+      build-path-deployment.o prepare-deploy-workspace.o repo.o \
+      log.o state.o templates.o progress.o remote.o cleanup.o
 
 # The final executable
 forge: $(OBJ)

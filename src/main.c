@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>  // for getenv()
+#include <stdlib.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include "help.h"
 #include "init.h"
 #include "deploy.h"
@@ -9,6 +10,9 @@
 #include "log.h"
 #include "config.h"
 #include "exit_codes.h"
+#include "state.h"
+#include "cleanup.h"
+
 void load_config(void) {
     const char *home = getenv("HOME");
     if (!home) {
@@ -20,7 +24,7 @@ void load_config(void) {
     snprintf(path, sizeof(path), "%s/.config/forge/config", home);
     
     FILE *f = fopen(path, "r");
-    if (!f) return;  // No config file, use defaults
+    if (!f) return;
     
     char line[256];
     while (fgets(line, sizeof(line), f)) {
@@ -38,17 +42,28 @@ void load_config(void) {
 }
 
 int main(int argc, char *argv[]) {
-    // Call environment variable from config.c
+    // Load environment and config
     load_env_defaults();
-    // Load config FIRST
     load_config();
+    setup_signal_handlers();
     
     int verbose_mode = 0;
     int quiet_mode = 0;
+    int offline_mode = 0;
+    int show_progress = isatty(STDOUT_FILENO);
     char *command = NULL;
     int command_index = -1;
     
-    // Parse flags
+    // Cleanup options
+    CleanupOptions cleanup_opts = {
+        .dry_run = 0,
+        .keep_versions = 0,
+        .older_than_days = 0,
+        .prune_images = 0,
+        .remove_all = 0
+    };
+    
+    // STEP 1: Parse flags ONLY (find the command)
     for(int i = 1; i < argc; i++) {
         if(strcmp(argv[i], "--verbose") == 0 || strcmp(argv[i], "-ver") == 0) {
             verbose_mode = 1;
@@ -64,6 +79,9 @@ int main(int argc, char *argv[]) {
             printf("Forge version %s\n", FORGE_VERSION);
             return EXIT_SUCCESS;
         }
+        else if(strcmp(argv[i], "--offline") == 0) {
+            offline_mode = 1;
+        }
         else {
             if (command == NULL) {
                 command = argv[i];
@@ -72,33 +90,92 @@ int main(int argc, char *argv[]) {
         }
     }
     
-    // Apply flags (override config)
+    // Parse cleanup-specific flags if command is cleanup
+    if (command != NULL && (strcmp(command, "cleanup") == 0 || strcmp(command, "--cleanup") == 0)) {
+        for (int i = command_index + 1; i < argc; i++) {
+            if (strcmp(argv[i], "--dry-run") == 0) {
+                cleanup_opts.dry_run = 1;
+            }
+            else if (strcmp(argv[i], "--keep") == 0 && i + 1 < argc) {
+                i++;
+                cleanup_opts.keep_versions = atoi(argv[i]);
+            }
+            else if (strcmp(argv[i], "--older-than") == 0 && i + 1 < argc) {
+                i++;
+                char *endptr;
+                cleanup_opts.older_than_days = strtol(argv[i], &endptr, 10);
+                if (*endptr == 'd') {
+                    cleanup_opts.older_than_days = strtol(argv[i], &endptr, 10);
+                }
+            }
+            else if (strcmp(argv[i], "--prune-images") == 0) {
+                cleanup_opts.prune_images = 1;
+            }
+            else if (strcmp(argv[i], "--all") == 0) {
+                cleanup_opts.remove_all = 1;
+            }
+        }
+    }
+    
+    // Quiet mode disables progress
+    if (quiet_mode) {
+        show_progress = 0;
+    }
+    
+    // STEP 2: Apply flags
     if (verbose_mode) {
         g_config.log_level = LOG_LEVEL_DEBUG;
     } else if (quiet_mode) {
         g_config.log_level = LOG_LEVEL_ERROR;
     }
     
-    // Log startup
+    // STEP 3: Log startup
     log_info("Forge started");
     if (verbose_mode) log_debug("Verbose mode enabled");
     if (quiet_mode) log_debug("Quiet mode enabled");
+    if (offline_mode) log_info("Offline mode enabled - using cached assets only");
     
-    // No arguments?
+    // STEP 4: No arguments?
     if (argc == 1 || command == NULL) {
         print_help(argv[0]);
         return EXIT_SUCCESS;
     }
     
-    // Handle commands
-    if (strcmp(command, "help") == 0) {
+    // STEP 5: Handle commands
+    if (strcmp(command, "--list") == 0) {
+        return list_deployments();
+    }
+    else if (strcmp(command, "--status") == 0) {
+        if (argc < command_index + 2) {
+            log_error("Usage: forge --status <project>");
+            return EXIT_BAD_ARGS;
+        }
+        return show_status(argv[command_index + 1]);
+    }
+    else if (strcmp(command, "--logs") == 0) {
+        if (argc < command_index + 2) {
+            log_error("Usage: forge --logs <project>");
+            return EXIT_BAD_ARGS;
+        }
+        return show_logs(argv[command_index + 1]);
+    }
+    else if (strcmp(command, "--rollback") == 0 || strcmp(command, "rollback") == 0) {
+        if (argc < command_index + 2) {
+            log_error("Usage: forge --rollback <project>");
+            return EXIT_BAD_ARGS;
+        }
+        return rollback_deployment(argv[command_index + 1]);
+    }
+    else if (strcmp(command, "help") == 0 || strcmp(command, "--help") == 0) {
         print_help(argv[0]);
         return EXIT_SUCCESS;
     }
-    
-    if (strcmp(command, "deploy") == 0) {
+    else if (strcmp(command, "cleanup") == 0 || strcmp(command, "--cleanup") == 0) {
+        return run_cleanup(&cleanup_opts);
+    }
+    else if (strcmp(command, "deploy") == 0 || strcmp(command, "--deploy") == 0) {
         if (argc < command_index + 2) {
-            log_error("Usage: %s deploy <repo_url> [-i|-d]", argv[0]);
+            log_error("Usage: forge deploy <repo_url> [-i|-d] [--offline]");
             return EXIT_BAD_ARGS;
         }
         
@@ -113,15 +190,48 @@ int main(int argc, char *argv[]) {
             }
         }
         
-        return deploy_repo(repo_url, mode);
+        return deploy_repo(repo_url, mode, offline_mode, show_progress);
     }
-    
-    if (strcmp(command, "init") == 0) {
+    else if (strcmp(command, "init") == 0 || strcmp(command, "--init") == 0) {
         if (argc < command_index + 2) {
-            log_error("Usage: %s init <project_name>", argv[0]);
+            log_error("Usage: forge init <project_name> [--type python|node|go|rust|c] [--ci github]");
             return EXIT_BAD_ARGS;
         }
-        return init_project(argv[command_index + 1]);
+        
+        InitOptions opts = {0};
+        opts.project_name = argv[command_index + 1];
+        opts.language = LANG_PYTHON;
+        opts.ci = CI_NONE;
+        opts.interactive = 0;
+        
+        for (int i = command_index + 2; i < argc; i++) {
+            if (strcmp(argv[i], "--type") == 0 && i + 1 < argc) {
+                i++;
+                if (strcmp(argv[i], "python") == 0) opts.language = LANG_PYTHON;
+                else if (strcmp(argv[i], "node") == 0) opts.language = LANG_NODE;
+                else if (strcmp(argv[i], "go") == 0) opts.language = LANG_GO;
+                else if (strcmp(argv[i], "rust") == 0) opts.language = LANG_RUST;
+                else if (strcmp(argv[i], "c") == 0) opts.language = LANG_C;
+                else {
+                    log_error("Unknown language: %s (python, node, go, rust, c)", argv[i]);
+                    return EXIT_BAD_ARGS;
+                }
+            }
+            else if (strcmp(argv[i], "--ci") == 0 && i + 1 < argc) {
+                i++;
+                if (strcmp(argv[i], "github") == 0) opts.ci = CI_GITHUB;
+                else if (strcmp(argv[i], "gitlab") == 0) opts.ci = CI_GITLAB;
+                else {
+                    log_error("Unknown CI: %s (github, gitlab)", argv[i]);
+                    return EXIT_BAD_ARGS;
+                }
+            }
+        }
+        
+        return init_project(&opts);
+    }
+    else if (strcmp(command, "ssh") == 0 || strcmp(command, "--ssh") == 0) {
+        return handle_remote_command(argc - command_index, argv + command_index, show_progress);
     }
     
     // Unknown command

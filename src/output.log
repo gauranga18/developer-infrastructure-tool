@@ -1,0 +1,14 @@
+Loaded image: forge_docker:latest
+[2026-03-29 14:37:21] INFO: Forge started
+[2026-03-29 14:37:21] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-29 14:37:21] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-29 14:37:21] INFO: Project name detected: Docker
+[2026-03-29 14:37:21] INFO: Deploying as: Docker-v26 (version 26)
+[2026-03-29 14:37:21] INFO: Using cached repository from: /home/saurav/.local/state/forge/cache/repos/Docker
+[2026-03-29 14:37:21] INFO: Using cached Docker image from: /home/saurav/.local/state/forge/cache/images/forge_docker.tar
+[2026-03-29 14:37:21] INFO: Docker image loaded from cache: forge_docker
+[2026-03-29 14:37:21] INFO: Running: docker run -d --name Docker-v26 forge_docker 2>&1
+[2026-03-29 14:37:21] INFO: Container ID: f74b53063739f6348c6e7270a6b5bd64e814c7601b5869fbd65188f2f40d5b00
+[2026-03-29 14:37:21] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-29 14:37:21] INFO: Saved deployment: Docker-v26-20260329-143721
+[2026-03-29 14:37:21] INFO: Deployment saved: Docker-v26-20260329-143721 (v26)

@@ -128,3 +128,323 @@
 [2026-03-08 11:48:24] INFO: Running git clone https://github.com/gauranga18/Docker.git
 [2026-03-08 11:48:26] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
 
+[2026-03-08 12:30:23] INFO: Forge started
+[2026-03-08 12:30:23] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 12:30:23] INFO: Project name detected: Docker
+[2026-03-08 12:30:23] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 12:30:23] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-08 12:30:24] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-08 12:30:36] ERROR: No deployments found
+[2026-03-08 15:59:01] INFO: Forge started
+[2026-03-08 15:59:01] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 15:59:01] INFO: Project name detected: Docker
+[2026-03-08 15:59:01] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 15:59:01] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-08 15:59:02] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-08 16:16:18] INFO: Forge started
+[2026-03-08 16:16:18] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 16:16:18] INFO: Created directory: /home/saurav/.local/state/forge
+[2026-03-08 16:16:18] INFO: Created directory: /home/saurav/.local/state/forge/deployments
+[2026-03-08 16:16:18] INFO: Created directory: /home/saurav/.local/state/forge/current
+[2026-03-08 16:16:18] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-08 16:16:18] INFO: Project name detected: Docker
+[2026-03-08 16:16:18] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 16:16:18] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-08 16:16:18] ERROR: Failed to clone repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 16:16:50] INFO: Forge started
+[2026-03-08 16:16:50] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 16:16:50] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-08 16:16:50] INFO: Project name detected: Docker
+[2026-03-08 16:16:50] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 16:16:50] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-08 16:16:51] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-08 16:18:35] INFO: Forge started
+[2026-03-08 16:18:35] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 16:18:35] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-08 16:18:35] INFO: Project name detected: Docker
+[2026-03-08 16:18:35] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 16:18:35] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-08 16:18:35] ERROR: Failed to clone repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 16:18:43] INFO: Forge started
+[2026-03-08 16:18:43] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 16:18:43] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-08 16:18:43] INFO: Project name detected: Docker
+[2026-03-08 16:18:43] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 16:18:43] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-08 16:18:43] ERROR: Failed to clone repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 16:19:15] INFO: Forge started
+[2026-03-08 16:19:15] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 16:19:15] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-08 16:19:15] INFO: Project name detected: Docker
+[2026-03-08 16:19:15] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 16:19:15] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-08 16:19:16] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-08 22:24:50] ERROR: No deployments found
+[2026-03-08 22:34:51] ERROR: No deployments found
+[2026-03-08 22:35:25] ERROR: Usage: forge status <project>
+[2026-03-08 22:36:12] ERROR: No deployment found for project: Docker
+[2026-03-08 22:36:46] ERROR: No deployment found for project: forge_docker
+[2026-03-08 22:41:53] INFO: Forge started
+[2026-03-08 22:41:53] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 22:41:53] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-08 22:41:53] INFO: Project name detected: Docker
+[2026-03-08 22:41:53] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 22:41:53] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-08 22:42:04] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-08 22:43:33] INFO: Forge started
+[2026-03-08 22:43:33] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 22:43:33] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-08 22:43:33] INFO: Project name detected: Docker
+[2026-03-08 22:43:33] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 22:43:33] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-08 22:43:33] ERROR: Failed to clone repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 22:44:01] INFO: Forge started
+[2026-03-08 22:44:01] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 22:44:01] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-08 22:44:01] INFO: Project name detected: Docker
+[2026-03-08 22:44:01] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-08 22:44:01] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-08 22:44:02] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-08 22:44:45] INFO: Forge started
+[2026-03-08 22:44:45] ERROR: Unknown command 'status'
+[2026-03-08 22:44:56] ERROR: No deployments found
+[2026-03-08 22:45:09] ERROR: No deployments found
+[2026-03-08 22:45:19] ERROR: No deployment found for project: Docker
+[2026-03-08 22:54:34] ERROR: Usage: forge logs <project>
+[2026-03-08 22:54:43] ERROR: No deployment found for project: Docker
+[2026-03-08 22:56:21] ERROR: No deployments found
+[2026-03-08 23:01:14] ERROR: No deployments found
+[2026-03-08 23:03:40] ERROR: No deployments found
+[2026-03-09 15:30:26] ERROR: No deployments found
+[2026-03-09 15:30:40] ERROR: No deployment found for project: Docker
+[2026-03-09 15:49:29] ERROR: No deployment found for project: Docker
+[2026-03-09 15:50:20] INFO: Forge started
+[2026-03-09 15:50:20] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-09 15:50:20] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-09 15:50:20] INFO: Project name detected: Docker
+[2026-03-09 15:50:20] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-09 15:50:20] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-09 15:50:21] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-09 15:50:51] INFO: Forge started
+[2026-03-09 15:50:51] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-09 15:50:51] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-09 15:50:51] INFO: Project name detected: Docker
+[2026-03-09 15:50:51] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-09 15:50:51] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-09 15:50:51] ERROR: Failed to clone repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-09 15:51:21] INFO: Forge started
+[2026-03-09 15:51:21] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-09 15:51:21] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-09 15:51:21] INFO: Project name detected: Docker
+[2026-03-09 15:51:21] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-09 15:51:21] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-09 15:51:22] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-09 15:51:47] ERROR: No deployment found for project: Docker
+[2026-03-09 15:52:13] ERROR: No deployment found for project: forge_docker
+[2026-03-09 15:55:21] INFO: Forge started
+[2026-03-09 15:55:21] ERROR: No deployment found for project: Docker
+[2026-03-09 15:56:36] INFO: Forge started
+[2026-03-09 15:56:36] ERROR: No deployment found for project: docker
+[2026-03-09 15:56:44] INFO: Forge started
+[2026-03-09 15:56:44] ERROR: No deployment found for project: forge_docker
+[2026-03-10 09:27:11] INFO: Forge started
+[2026-03-10 09:27:11] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-10 09:27:11] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-10 09:27:11] INFO: Project name detected: Docker
+[2026-03-10 09:27:11] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-10 09:27:11] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-10 09:27:12] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-10 09:27:57] INFO: Forge started
+[2026-03-10 09:27:57] ERROR: Unknown command 'logs'
+[2026-03-10 09:28:14] INFO: Forge started
+[2026-03-10 09:28:14] ERROR: No deployment found for project: Docker
+[2026-03-10 21:43:53] INFO: Forge started
+[2026-03-10 21:43:53] ERROR: No deployment found for project: Docker
+[2026-03-10 21:44:14] INFO: Forge started
+[2026-03-10 21:44:14] ERROR: No deployments found
+[2026-03-10 22:00:48] INFO: Forge started
+[2026-03-10 22:00:48] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-10 22:00:48] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-10 22:00:48] INFO: Project name detected: Docker
+[2026-03-10 22:00:48] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-10 22:00:48] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-10 22:00:48] ERROR: Failed to clone repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-10 22:01:00] INFO: Forge started
+[2026-03-10 22:01:00] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-10 22:01:00] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-10 22:01:00] INFO: Project name detected: Docker
+[2026-03-10 22:01:00] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-10 22:01:00] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-10 22:01:01] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-10 22:01:27] INFO: Forge started
+[2026-03-10 22:01:27] ERROR: No deployment found for project: Docker
+[2026-03-10 22:16:55] INFO: Forge started
+[2026-03-10 22:17:45] INFO: Forge started
+[2026-03-10 22:19:38] INFO: Forge started
+[2026-03-10 22:19:38] ERROR: No deployment found for project: Docker
+[2026-03-10 22:38:28] INFO: Forge started
+[2026-03-10 22:38:28] ERROR: No deployment found for project: Docker
+[2026-03-10 22:38:47] INFO: Forge started
+[2026-03-10 22:38:47] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-10 22:38:47] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-10 22:38:47] INFO: Project name detected: Docker
+[2026-03-10 22:38:47] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-10 22:38:47] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-10 22:38:48] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-10 22:49:42] INFO: Forge started
+[2026-03-10 22:49:42] ERROR: No deployment found for project: Docker
+[2026-03-10 22:51:27] INFO: Forge started
+[2026-03-13 13:13:40] INFO: Forge started
+[2026-03-13 13:15:36] INFO: Forge started
+[2026-03-13 13:15:36] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-13 13:15:36] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-13 13:15:36] INFO: Project name detected: Docker
+[2026-03-13 13:15:36] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-13 13:15:36] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-13 13:15:38] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-13 13:24:09] INFO: Forge started
+[2026-03-13 13:24:09] ERROR: No logs available for interactive session
+[2026-03-13 13:25:58] INFO: Forge started
+[2026-03-13 13:25:58] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-13 13:25:58] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-13 13:25:58] INFO: Project name detected: Docker
+[2026-03-13 13:25:58] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-13 13:25:58] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-13 13:26:05] INFO: Repository cloned successfully from URL: https://github.com/gauranga18/Docker.git
+
+[2026-03-13 13:26:19] INFO: Forge started
+[2026-03-13 13:50:04] INFO: Forge started
+[2026-03-13 13:50:04] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-13 13:50:04] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-13 13:50:04] INFO: Project name detected: Docker
+[2026-03-13 13:50:04] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-13 13:50:04] INFO: Running git clone https://github.com/gauranga18/Docker.git
+[2026-03-13 13:50:04] ERROR: Failed to clone repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-13 13:50:19] INFO: Forge started
+[2026-03-13 13:50:19] ERROR: Unknown command 'status'
+[2026-03-13 13:50:31] INFO: Forge started
+[2026-03-13 13:50:55] INFO: Forge started
+[2026-03-13 13:50:55] INFO: Rolling back Docker from v9 to v8
+[2026-03-13 13:50:55] INFO: Stopping current container: fbea22fc7de8
+[2026-03-13 13:50:56] INFO: Starting previous version (v8)
+[2026-03-13 13:50:56] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-13 13:50:56] INFO: Saved deployment: Docker-20260313-135056
+[2026-03-13 13:50:56] INFO: Rollback complete: Docker-20260313-135056 (v10)
+[2026-03-13 13:51:19] INFO: Forge started
+[2026-03-13 13:51:34] INFO: Forge started
+[2026-03-23 15:59:39] INFO: Forge started
+[2026-03-23 15:59:39] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-23 15:59:39] INFO: Created directory: /home/saurav/.local/state/forge/projects
+[2026-03-23 15:59:39] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-23 15:59:39] INFO: Project name detected: Docker
+[2026-03-23 15:59:39] INFO: Deploying as: Docker-v1 (version 1)
+[2026-03-23 15:59:39] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git to Docker-v1
+[2026-03-23 15:59:39] INFO: Running: git clone https://github.com/gauranga18/Docker.git Docker-v1
+[2026-03-23 15:59:41] INFO: Repository cloned successfully to: Docker-v1
+[2026-03-23 16:02:40] INFO: Forge started
+[2026-03-23 16:02:40] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-23 16:02:40] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-23 16:02:40] INFO: Project name detected: Docker
+[2026-03-23 16:02:40] INFO: Deploying as: Docker-v2 (version 2)
+[2026-03-23 16:02:40] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git to Docker-v2
+[2026-03-23 16:02:40] INFO: Running: git clone https://github.com/gauranga18/Docker.git Docker-v2
+[2026-03-23 16:02:41] INFO: Repository cloned successfully to: Docker-v2
+[2026-03-23 16:02:47] INFO: Forge started
+[2026-03-23 16:02:47] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-23 16:02:47] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-23 16:02:47] INFO: Project name detected: Docker
+[2026-03-23 16:02:47] INFO: Deploying as: Docker-v3 (version 3)
+[2026-03-23 16:02:47] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git to Docker-v3
+[2026-03-23 16:02:47] INFO: Running: git clone https://github.com/gauranga18/Docker.git Docker-v3
+[2026-03-23 16:02:50] INFO: Repository cloned successfully to: Docker-v3
+[2026-03-23 16:02:55] INFO: Forge started
+[2026-03-23 16:02:55] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-23 16:02:55] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-23 16:02:55] INFO: Project name detected: Docker
+[2026-03-23 16:02:55] INFO: Deploying as: Docker-v4 (version 4)
+[2026-03-23 16:02:55] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git to Docker-v4
+[2026-03-23 16:02:55] INFO: Running: git clone https://github.com/gauranga18/Docker.git Docker-v4
+[2026-03-23 16:02:56] INFO: Repository cloned successfully to: Docker-v4
+[2026-03-23 20:10:55] INFO: Forge started
+[2026-03-23 20:10:55] INFO: Forge started
+[2026-03-23 20:10:55] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-23 20:10:55] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-23 20:10:55] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-23 20:10:55] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-23 20:10:55] INFO: Project name detected: Docker
+[2026-03-23 20:10:55] INFO: Project name detected: Docker
+[2026-03-23 20:10:55] INFO: Deploying as: Docker-v5 (version 5)
+[2026-03-23 20:10:55] INFO: Deploying as: Docker-v5 (version 5)
+[2026-03-23 20:10:55] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git to Docker-v5
+[2026-03-23 20:10:55] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git to Docker-v5
+[2026-03-23 20:10:55] INFO: Running: git clone https://github.com/gauranga18/Docker.git Docker-v5
+[2026-03-23 20:10:55] INFO: Running: git clone https://github.com/gauranga18/Docker.git Docker-v5
+[2026-03-23 20:10:55] ERROR: Failed to clone repository: https://github.com/gauranga18/Docker.git
+[2026-03-23 20:10:56] INFO: Repository cloned successfully to: Docker-v5
+[2026-03-23 20:21:17] INFO: Forge started
+[2026-03-23 20:21:17] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-23 20:21:17] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-23 20:21:17] INFO: Project name detected: Docker
+[2026-03-23 20:21:17] INFO: Deploying as: Docker-v6 (version 6)
+[2026-03-23 20:21:17] INFO: Forge started
+[2026-03-23 20:21:17] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-23 20:21:17] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-23 20:21:17] INFO: Project name detected: Docker
+[2026-03-24 17:15:58] INFO: Forge started
+[2026-03-24 17:15:58] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-24 17:15:58] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-24 17:15:58] INFO: Project name detected: Docker
+[2026-03-24 17:15:58] INFO: Deploying as: Docker-v1 (version 1)
+[2026-03-24 17:15:58] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git to Docker-v1
+[2026-03-24 17:15:58] INFO: Running: git clone https://github.com/gauranga18/Docker.git Docker-v1
+[2026-03-24 17:15:59] INFO: Repository cloned successfully to: Docker-v1
+[2026-03-24 17:22:39] INFO: Forge started
+[2026-03-24 17:22:39] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-24 17:22:39] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-24 17:22:39] INFO: Project name detected: Docker
+[2026-03-24 17:22:39] INFO: Deploying as: Docker-v2 (version 2)
+[2026-03-24 17:22:39] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git to Docker-v2
+[2026-03-24 17:22:39] INFO: Running: git clone https://github.com/gauranga18/Docker.git Docker-v2
+[2026-03-24 17:22:40] INFO: Repository cloned successfully to: Docker-v2
+[2026-03-24 17:23:17] INFO: Forge started
+[2026-03-24 17:23:17] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-24 17:23:17] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-24 17:23:17] INFO: Project name detected: Docker
+[2026-03-24 17:23:17] INFO: Deploying as: Docker-v3 (version 3)
+[2026-03-24 17:23:17] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git to Docker-v3
+[2026-03-24 17:23:17] INFO: Running: git clone https://github.com/gauranga18/Docker.git Docker-v3
+[2026-03-24 17:23:18] INFO: Repository cloned successfully to: Docker-v3
+[2026-03-24 17:32:27] INFO: Forge started
+[2026-03-24 17:32:27] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-24 17:32:27] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-24 17:32:27] INFO: Project name detected: Docker
+[2026-03-24 17:32:27] INFO: Deploying as: Docker-v1 (version 1)
+[2026-03-24 17:32:27] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git to Docker-v1
+[2026-03-24 17:32:27] INFO: Running: git clone https://github.com/gauranga18/Docker.git Docker-v1
+[2026-03-24 17:32:29] INFO: Repository cloned successfully to: Docker-v1
+[2026-03-24 20:27:35] DEBUG: Signal handlers installed
+[2026-03-24 20:27:35] INFO: Forge started
+[2026-03-24 20:27:35] DEBUG: Signal handlers installed
+[2026-03-24 20:27:35] INFO: Deploying repository from URL: https://github.com/gauranga18/Docker.git
+[2026-03-24 20:27:35] INFO: State system initialized at /home/saurav/.local/state/forge
+[2026-03-24 20:27:35] INFO: Project name detected: Docker
+[2026-03-24 20:27:35] INFO: Deploying as: Docker-v2 (version 2)
+[2026-03-24 20:27:35] INFO: Cloning repository from URL: https://github.com/gauranga18/Docker.git to Docker-v2
+[2026-03-24 20:27:35] INFO: Running: git clone https://github.com/gauranga18/Docker.git Docker-v2
+[2026-03-24 20:27:35] DEBUG: Tracking child PID: 20789
+[2026-03-24 20:27:36] INFO: Received interrupt signal, cleaning up...
+[2026-03-24 20:27:36] INFO: Cleaning up child processes...
+[2026-03-24 20:27:36] INFO: Terminating child PID: 20789
+[2026-03-24 20:27:36] INFO: Cleanup complete

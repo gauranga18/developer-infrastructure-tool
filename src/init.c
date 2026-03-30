@@ -6,8 +6,30 @@
 #include "log.h"
 #include "init.h"
 #include "exit_codes.h"
+#include "templates.h"
 
-int init_project(const char *project_name) {
+static int create_file(const char *path, const char *content) {
+    FILE *f = fopen(path, "w");
+    if (!f) {
+        log_error("Failed to create %s: %s", path, strerror(errno));
+        return -1;
+    }
+    fprintf(f, "%s", content);
+    fclose(f);
+    return 0;
+}
+
+static int create_directory(const char *path) {
+    if (mkdir(path, 0755) != 0 && errno != EEXIST) {
+        log_error("Failed to create %s: %s", path, strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
+int init_project(const InitOptions *opts) {
+    const char *project_name = opts->project_name;
+    
     if (project_name == NULL || strlen(project_name) == 0) {
         log_error("Project name cannot be empty.");
         return EXIT_BAD_ARGS;
@@ -19,72 +41,80 @@ int init_project(const char *project_name) {
     }
     
     // Create main project directory
-    if (mkdir(project_name, 0755) != 0) {
-        if (errno == EEXIST) {
-            log_error("Directory '%s' already exists.", project_name);
-            return EXIT_GENERIC;
-        } else {
-            log_error("Failed to create directory '%s': %s", project_name, strerror(errno));
-            return EXIT_GENERIC;
-        }
+    if (create_directory(project_name) != 0) {
+        return EXIT_GENERIC;
     }
     
     // Create src directory
     char path[256];
     snprintf(path, sizeof(path), "%s/src", project_name);
-    if (mkdir(path, 0755) != 0) {
-        log_error("Failed to create %s: %s", path, strerror(errno));
-        return EXIT_GENERIC;
-    }
+    create_directory(path);
     
-    // Create include directory
-    snprintf(path, sizeof(path), "%s/include", project_name);
-    if (mkdir(path, 0755) != 0) {
-        log_error("Failed to create %s: %s", path, strerror(errno));
-        return EXIT_GENERIC;
-    }
+    // Create tests directory
+    snprintf(path, sizeof(path), "%s/tests", project_name);
+    create_directory(path);
     
-    // Create build directory
-    snprintf(path, sizeof(path), "%s/build", project_name);
-    if (mkdir(path, 0755) != 0) {
-        log_error("Failed to create %s: %s", path, strerror(errno));
-        return EXIT_GENERIC;
-    }
+    // Create main source file
+    snprintf(path, sizeof(path), "%s/src/main.%s", project_name,
+             opts->language == LANG_PYTHON ? "py" :
+             opts->language == LANG_NODE ? "js" :
+             opts->language == LANG_GO ? "go" :
+             opts->language == LANG_RUST ? "rs" : "c");
+    const char *main_content = get_main_template(opts->language, project_name);
+    create_file(path, main_content);
     
-    // Create .forge.yaml
-    snprintf(path, sizeof(path), "%s/.forge.yaml", project_name);
-    FILE *yaml = fopen(path, "w");
-    if (yaml == NULL) {
-        log_error("Failed to create .forge.yaml: %s", strerror(errno));
-        return EXIT_GENERIC;
-    }
-    fprintf(yaml, 
-        "name: %s\n"
-        "version: 1\n"
-        "runtime: docker\n",
-        project_name);
-    fclose(yaml);
+    // Create test file
+    snprintf(path, sizeof(path), "%s/tests/test_main.%s", project_name,
+             opts->language == LANG_PYTHON ? "py" :
+             opts->language == LANG_NODE ? "js" :
+             opts->language == LANG_GO ? "go" :
+             opts->language == LANG_RUST ? "rs" : "c");
+    const char *test_content = get_test_template(opts->language);
+    create_file(path, test_content);
     
-    // Create README.md
-    snprintf(path, sizeof(path), "%s/README.md", project_name);
-    FILE *readme = fopen(path, "w");
-    if (readme == NULL) {
-        log_error("Failed to create README.md: %s", strerror(errno));
-        return EXIT_GENERIC;
-    }
-    fprintf(readme, "# %s\n\nProject initialized with Forge.\n", project_name);
-    fclose(readme);
+    // Create Dockerfile
+    snprintf(path, sizeof(path), "%s/Dockerfile", project_name);
+    const char *dockerfile = get_dockerfile_template(opts->language);
+    create_file(path, dockerfile);
     
     // Create .gitignore
     snprintf(path, sizeof(path), "%s/.gitignore", project_name);
-    FILE *gitignore = fopen(path, "w");
-    if (gitignore == NULL) {
-        log_error("Failed to create .gitignore: %s", strerror(errno));
-        return EXIT_GENERIC;
-    }
-    fprintf(gitignore, "build/\n*.log\n");
-    fclose(gitignore);
+    const char *gitignore = get_gitignore_template(opts->language);
+    create_file(path, gitignore);
     
-    log_info("Project '%s' initialized successfully!", project_name);
+    // Create .forge.yaml
+    snprintf(path, sizeof(path), "%s/.forge.yaml", project_name);
+    const char *yaml = get_forge_yaml_template(project_name, opts->language);
+    create_file(path, yaml);
+    
+    // Create README.md
+    snprintf(path, sizeof(path), "%s/README.md", project_name);
+    const char *readme = get_readme_template(project_name, opts->language);
+    create_file(path, readme);
+    
+    // Create .env.example
+    snprintf(path, sizeof(path), "%s/.env.example", project_name);
+    const char *env = get_env_example_template(opts->language);
+    create_file(path, env);
+    
+    // Create CI config if requested
+    if (opts->ci == CI_GITHUB) {
+        snprintf(path, sizeof(path), "%s/.github/workflows/ci.yml", project_name);
+        create_directory(path);
+        char *p = strrchr(path, '/');
+        if (p) *p = '\0';
+        create_directory(path);
+        *p = '/';
+        const char *ci = get_ci_template(opts->ci, opts->language);
+        create_file(path, ci);
+    }
+    
+    log_info("Project '%s' initialized successfully with %s template!",
+             project_name,
+             opts->language == LANG_PYTHON ? "Python" :
+             opts->language == LANG_NODE ? "Node.js" :
+             opts->language == LANG_GO ? "Go" :
+             opts->language == LANG_RUST ? "Rust" : "C");
+    
     return EXIT_SUCCESS;
 }
