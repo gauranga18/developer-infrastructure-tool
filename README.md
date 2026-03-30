@@ -1,14 +1,17 @@
 <div align="center">
 
-# Developer Infrastructure Tool
+<img src="https://img.shields.io/badge/Forge-CLI-000000?style=for-the-badge&logoColor=white" alt="Forge" />
 
-### Lightweight CLI for Automating Dockerized Deployments
+### Developer Infrastructure Tool
+
+A lightweight CLI written in C for automating Dockerized deployments — from project scaffolding to remote deployment and rollback.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Status](https://img.shields.io/badge/status-early--stage-yellow)](https://github.com)
-[![Platform](https://img.shields.io/badge/platform-linux-lightgrey)](https://github.com)
+[![Language](https://img.shields.io/badge/language-C-00599C.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
+[![Platform](https://img.shields.io/badge/platform-linux-FCC624?logo=linux&logoColor=black)](https://kernel.org)
+[![Status](https://img.shields.io/badge/status-stable-brightgreen)](https://github.com)
 
-[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Roadmap](#roadmap) • [Contributing](#contributing)
+[Overview](#overview) • [Features](#features) • [Installation](#installation) • [Usage](#usage) • [Philosophy](#development-philosophy) • [Contributing](#contributing)
 
 </div>
 
@@ -16,67 +19,57 @@
 
 ## Overview
 
-A command-line interface built from scratch in **C** for deploying containerized applications with minimal configuration. This tool automates the heavy lifting of modern DevOps workflows — cloning repositories, building Docker images, managing containers, and tracking deployment state.
+**Forge** is a command-line deployment tool built from scratch in C. It handles the full lifecycle of containerized applications — initializing project scaffolding, cloning repositories, building and running Docker containers, tracking deployment state, viewing logs, rolling back versions, and deploying to remote servers over SSH.
 
-**Why this exists:** To deeply understand low-level system interactions, process management, and infrastructure automation without relying on high-level frameworks or abstractions.
-
-> **Project Status:** Early-stage (V1) — Active development. Core functionality is being implemented. Not production-ready.
+Built without high-level frameworks or abstractions, Forge is a ground-up systems project designed for developers who want direct control over their infrastructure tooling.
 
 ---
 
 ## Who Is This For?
 
-| Audience | What You'll Gain |
-|----------|------------------|
-| Linux Users | Lightweight deployment automation for personal and team projects |
-| DevOps Beginners | Hands-on exposure to real infrastructure concepts |
-| Systems Programmers | Practical low-level C development in a DevOps context |
-| Students | A real-world application of systems programming principles |
+| Audience | What You Get |
+|----------|--------------|
+| Linux Developers | Fast, scriptable deployment automation with no runtime dependencies |
+| DevOps Engineers | A self-contained CLI covering the full deploy-manage-rollback loop |
+| Systems Programmers | A real-world C project using POSIX, process management, and SSH |
+| Students | A complete, working reference for low-level infrastructure tooling |
 
 ---
 
 ## Features
 
-### Currently Implemented (V1)
-
-- Robust CLI argument parsing
-- Shell command execution via `system()`
-- Exit code handling and comprehensive error reporting
-- Modular, maintainable C project structure
-- Basic logging framework
-
-### Planned
-
-- Git repository cloning and validation
-- Docker image building from Dockerfiles
-- Container lifecycle management (start, stop, restart)
-- Deployment state persistence (JSON-based)
-- Structured logging to file
-- Rollback to previous deployments
-- CI/CD configuration templates
-- Remote deployment via SSH
-- Multi-container orchestration
+- Project initialization with language templates (Python, Node, Go, Rust, C)
+- GitHub Actions CI workflow generation
+- Git repository cloning and Docker image building
+- Container lifecycle management — start, stop, restart, interactive and detached modes
+- Deployment state persistence and version tracking
+- Structured logging with verbosity control
+- Rollback to previous deployment versions
+- Cleanup tooling with dry-run, age-based, and count-based filtering
+- Remote deployment over SSH
+- Quiet and verbose output modes
 
 ---
 
 ## Project Structure
-
 ```
-mytool/
+forge/
 ├── src/
 │   ├── main.c              # CLI entry point and argument parsing
 │   ├── deploy.c            # Deployment orchestration logic
-│   ├── deploy.h            # Deployment function declarations
-│   ├── utils.c             # Command execution and helper functions
-│   ├── utils.h             # Utility function declarations
-│   └── config.c            # Configuration file handling
+│   ├── deploy.h
+│   ├── utils.c             # Command execution and helpers
+│   ├── utils.h
+│   ├── help.c              # Help output
+│   ├── help.h
+│   └── config.c            # Configuration handling
 ├── scripts/
-│   └── docker.sh           # Shell scripts for Docker operations
+│   └── docker.sh           # Docker operation scripts
 ├── state/
 │   └── deployments.json    # Deployment state tracking
 ├── logs/
-│   └── mytool.log          # Application logs
-├── Makefile                # Build automation
+│   └── forge.log           # Application logs
+├── Makefile
 ├── README.md
 └── .gitignore
 ```
@@ -89,151 +82,164 @@ mytool/
 |-------------|-----------------|---------|
 | Linux | Ubuntu 20.04+ / Debian 11+ | Operating system |
 | GCC | 7.0+ | C compiler |
-| Git | 2.0+ | Version control |
+| Git | 2.0+ | Repository cloning |
 | Docker | 20.0+ | Containerization |
 | Make | Any recent | Build automation |
+| OpenSSH | Any recent | Remote deployment |
 
 ---
 
 ## Installation
 
 ### Quick Start
-
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/mytool.git
-cd mytool
-
-# Build the project
+git clone https://github.com/yourusername/forge.git
+cd forge
 make
 ```
 
 ### Manual Compilation
-
 ```bash
-gcc -o mytool src/main.c src/utils.c src/deploy.c -Wall -Wextra
+gcc -o forge src/main.c src/utils.c src/deploy.c src/help.c src/config.c -Wall -Wextra
 ```
 
 ---
 
 ## Usage
 
-### Deploy an Application
-
+### Initialize a Project
 ```bash
-./mytool deploy https://github.com/user/app.git
+forge init <project_name>
+forge init myapp --type node
+forge init myapp --type python --ci github
 ```
 
-### Check Version
+Supported languages: `python`, `node`, `go`, `rust`, `c`
 
+### Deploy a Repository
 ```bash
-./mytool --version
+forge deploy https://github.com/user/repo.git
+forge deploy https://github.com/user/repo.git -d    # detached mode
+forge deploy https://github.com/user/repo.git -i    # interactive mode
 ```
 
-### Get Help
-
+### Manage Deployments
 ```bash
-./mytool --help
+forge --list                      # List all deployments
+forge --status <project>          # Show deployment status
+forge --logs <project>            # View container logs
+forge --rollback <project>        # Rollback to previous version
 ```
+
+### Cleanup
+```bash
+forge cleanup --dry-run                      # Preview what would be removed
+forge cleanup --keep 3                       # Keep last 3 versions per project
+forge cleanup --older-than 7                 # Remove deployments older than 7 days
+forge cleanup --prune-images                 # Remove unused Docker images
+forge cleanup --all                          # Remove everything except current deployment
+forge cleanup --keep 3 --dry-run             # Combined
+forge cleanup --older-than 7 --prune-images  # Combined
+```
+
+### Remote Deployment via SSH
+```bash
+forge ssh user@host deploy https://github.com/user/repo.git
+forge ssh user@host --status myapp
+forge ssh user@host --rollback myapp
+```
+
+### Global Flags
+
+| Flag | Description |
+|------|-------------|
+| `-v` | Show Forge version |
+| `-h`, `--help` | Show help message |
+| `-ver`, `--verbose` | Enable debug logging |
+| `-q`, `--quiet` | Suppress info and warnings, show errors only |
 
 ---
 
 ## Development Philosophy
 
-### Why C?
+### Why C ?
 
-C provides direct access to system calls and process management. Building this tool in C serves to:
+C gives direct access to system calls, process management, and memory — exactly what a deployment tool needs. There are no runtime dependencies, no garbage collector pauses, and no framework abstractions hiding what the tool actually does. Every operation is explicit.
 
-- Develop practical understanding of memory management and resource allocation
-- Learn POSIX APIs and Linux system programming
-- Build skills in performance-critical infrastructure code
-- Gain experience with compiled languages in a DevOps context
+### Linux-First
 
-### Why `system()` in V1?
+Forge targets Linux environments where Docker, Git, and SSH are standard. This focus allows deep integration with Linux-specific features — `fork`, `exec`, POSIX signals, and process groups — without cross-platform compromises.
 
-The current implementation uses `system()` for command execution as a pragmatic starting point. This enables rapid prototyping of core workflows before implementing proper process forking, piping, and signal handling with `fork()`, `exec()`, and related syscalls. Future versions will replace `system()` with lower-level process management for improved security, error handling, and control.
+### Process Management
 
-### Linux-First Approach
-
-Designed exclusively for Linux environments where Docker and Git are standard tooling. This focus enables deep integration with Linux-specific features without cross-platform complexity.
-
----
-
-## Current Limitations
-
-| Limitation | Impact |
-|------------|--------|
-| Early Development | Core features still under implementation |
-| Local Only | No remote server or cloud support yet |
-| No Kubernetes | Single-host Docker deployments only |
-| Limited Recovery | Basic error handling without sophisticated rollback |
-| Security Concerns | `system()` usage carries known security implications |
-| Not Production-Ready | Suitable for learning and experimentation only |
+Early versions used `system()` for rapid prototyping of core workflows. The current implementation moves to proper `fork()`/`exec()` based process management for improved security, signal handling, and output control.
 
 ---
 
 ## Roadmap
 
-### V1 — Current
+### V1 — Foundation
 
 - [x] CLI argument parser
 - [x] Command execution framework
-- [ ] Git clone integration
-- [ ] Docker build automation
-- [ ] Container run/stop commands
+- [x] Git clone integration
+- [x] Docker build automation
+- [x] Container run/stop commands
 
-### V2 — Next
+### V2 — State and Observability
 
-- [ ] Deployment state persistence
-- [ ] Structured logging
-- [ ] Configuration file support
-- [ ] Environment variable management
-- [ ] Basic rollback functionality
+- [x] Deployment state persistence (JSON)
+- [x] Structured logging with log levels
+- [x] Configuration file support
+- [x] Environment variable management
+- [x] Rollback functionality
 
-### V3 — Future
+### V3 — Remote and Orchestration
 
-- [ ] SSH-based remote deployment
-- [ ] Multi-container application support
-- [ ] Health check integration
-- [ ] CI/CD template generation
-- [ ] Replace `system()` with `fork()`/`exec()`
+- [x] SSH-based remote deployment
+- [x] Multi-container application support
+- [x] Health check integration
+- [x] CI/CD template generation (GitHub Actions)
+- [x] Replaced `system()` with `fork()`/`exec()`
 
 ---
 
 ## Contributing
 
-Contributions are welcome. This is a learning-oriented project, and beginner-friendly contributions are encouraged.
+Contributions are welcome. This project is built to be readable and approachable — beginner contributions are encouraged.
 
-### How to Contribute
+**Steps to contribute:**
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Make your changes with clear, descriptive commit messages
-4. Test thoroughly on Linux
-5. Submit a pull request with a summary of changes
+3. Make your changes with clear commit messages
+4. Test on Linux
+5. Open a pull request with a description of your changes
 
-### Coding Standards
+**Coding standards:**
 
-- Follow the Linux kernel coding style
-- Use meaningful variable and function names
-- Comment complex logic clearly
-- Handle all errors explicitly
-- Avoid memory leaks — use `valgrind` during development
+- Linux kernel coding style
+- Meaningful variable and function names
+- Comment non-obvious logic
+- Explicit error handling on every syscall
+- Run `valgrind` to catch memory leaks before submitting
 
 ---
 
 ## License
 
-**MIT License** — Copyright (c) 2024
+MIT License — Copyright (c) 2024
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 
 ---
 
-## Contact
+<div align="center">
 
-Questions or suggestions? [Open an issue](https://github.com/yourusername/mytool/issues) on GitHub.
+Questions or suggestions? [Open an issue](https://github.com/yourusername/forge/issues)
+
+</div>
