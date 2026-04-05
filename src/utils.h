@@ -17,7 +17,10 @@ void add_child_pid(pid_t pid);
 void remove_child_pid(pid_t pid);
 void set_cleanup_flag(int flag);
 
-// Global flag for cleanup
+// Global flag for cleanupf
 extern volatile sig_atomic_t g_cleaning_up;
+
+//copy a file from src to dst
+int copy_file(const char *src, const char *dst);
 
 #endif
