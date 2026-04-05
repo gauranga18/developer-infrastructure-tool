@@ -149,3 +149,9 @@ int run_command_fork(const char **argv) {
     }
     return -1;
 }
+// Copy a file from src to dst
+int copy_file(const char *src, const char *dst) {
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd), "cp %s %s 2>/dev/null", src, dst);
+    return system(cmd);
+}

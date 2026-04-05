@@ -206,19 +206,28 @@ int state_save(const Deployment *dep) {
         return -1;
     }
     
+      // Write JSON with all fields
     fprintf(f, "{\n");
     fprintf(f, "  \"id\": \"%s\",\n", dep->id);
     fprintf(f, "  \"project\": \"%s\",\n", dep->project);
+    fprintf(f, "  \"project_base\": \"%s\",\n", dep->project_base);
     fprintf(f, "  \"url\": \"%s\",\n", dep->url);
     fprintf(f, "  \"image_id\": \"%s\",\n", dep->image_id);
     fprintf(f, "  \"container_id\": \"%s\",\n", dep->container_id);
     fprintf(f, "  \"port\": %d,\n", dep->port);
     fprintf(f, "  \"deployed_at\": %ld,\n", dep->deployed_at);
     fprintf(f, "  \"version\": %d,\n", dep->version);
-    fprintf(f, "  \"status\": %d\n", dep->status);
-    fprintf(f, "}\n");
+    fprintf(f, "  \"status\": %d,\n", dep->status);
     
-    fclose(f);
+    // FIELDS for bundle feature
+    fprintf(f, "  \"git_sha\": \"%s\",\n", dep->git_sha);
+    fprintf(f, "  \"git_branch\": \"%s\",\n", dep->git_branch);
+    fprintf(f, "  \"git_message\": \"%s\",\n", dep->git_message);
+    fprintf(f, "  \"image_size_kb\": %ld,\n", dep->image_size_kb);
+    fprintf(f, "  \"cache_path\": \"%s\",\n", dep->cache_path);
+    fprintf(f, "  \"image_tar_path\": \"%s\"\n", dep->image_tar_path);
+    
+    fprintf(f, "}\n");
     
     if (rename(temp_path, path) != 0) {
         log_error("Failed to rename deployment file: %s", strerror(errno));
@@ -227,19 +236,26 @@ int state_save(const Deployment *dep) {
         return -1;
     }
     
+    // Create symlink for versioned name (Docker-v3 -> file)
     char link_path[512];
     snprintf(link_path, sizeof(link_path), "%s/current/%s", base_path, dep->project);
     unlink(link_path);
-    
     if (symlink(path, link_path) == -1) {
-        log_warn("Failed to create current symlink: %s", strerror(errno));
+        log_warn("Failed to create versioned symlink: %s", strerror(errno));
+    }
+    
+    // Create symlink for base name (Docker -> Docker-v3)
+    char base_link_path[512];
+    snprintf(base_link_path, sizeof(base_link_path), "%s/current/%s", base_path, dep->project_base);
+    unlink(base_link_path);
+    if (symlink(link_path, base_link_path) == -1) {
+        log_warn("Failed to create base symlink: %s", strerror(errno));
     }
     
     log_info("Saved deployment: %s", dep->id);
     unlock_file(lock_fd);
     return 0;
 }
-
 // Parse deployment from JSON file
 static Deployment *parse_deployment_file(const char *path) {
     FILE *f = fopen(path, "r");
@@ -258,10 +274,17 @@ static Deployment *parse_deployment_file(const char *path) {
         
         if (sscanf(line, "  \"%[^\"]\": \"%[^\"]\",", key, value) == 2) {
             if (strcmp(key, "id") == 0) strncpy(dep->id, value, sizeof(dep->id)-1);
+            else if (strcmp(key, "project_base") == 0) strncpy(dep->project_base, value, sizeof(dep->project_base)-1);
             else if (strcmp(key, "project") == 0) strncpy(dep->project, value, sizeof(dep->project)-1);
             else if (strcmp(key, "url") == 0) strncpy(dep->url, value, sizeof(dep->url)-1);
             else if (strcmp(key, "image_id") == 0) strncpy(dep->image_id, value, sizeof(dep->image_id)-1);
             else if (strcmp(key, "container_id") == 0) strncpy(dep->container_id, value, sizeof(dep->container_id)-1);
+            else if (strcmp(key, "git_sha") == 0) strncpy(dep->git_sha, value, sizeof(dep->git_sha)-1);
+            else if (strcmp(key, "git_branch") == 0) strncpy(dep->git_branch, value, sizeof(dep->git_branch)-1);
+            else if (strcmp(key, "git_message") == 0) strncpy(dep->git_message, value, sizeof(dep->git_message)-1);
+            else if (strcmp(key, "image_size_kb") == 0) dep->image_size_kb = atol(value);
+            else if (strcmp(key, "cache_path") == 0) strncpy(dep->cache_path, value, sizeof(dep->cache_path)-1);
+            else if (strcmp(key, "image_tar_path") == 0) strncpy(dep->image_tar_path, value, sizeof(dep->image_tar_path)-1);
         }
         else if (sscanf(line, "  \"port\": %d,", &dep->port) == 1);
         else if (sscanf(line, "  \"deployed_at\": %ld,", &dep->deployed_at) == 1);
@@ -284,9 +307,27 @@ Deployment *state_find_latest(const char *project) {
     
     char target[512];
     ssize_t len = readlink(link_path, target, sizeof(target)-1);
-    if (len == -1) return NULL;
+    
+    // If not found, it might be a base name (Docker) that points to versioned name
+    // Try to resolve recursively
+    if (len == -1) {
+        return NULL;
+    }
     
     target[len] = '\0';
+    
+    // Check if target is a symlink (base -> versioned) or direct file
+    struct stat st;
+    if (lstat(target, &st) == 0 && S_ISLNK(st.st_mode)) {
+        // It's a symlink, resolve it
+        char final_target[512];
+        ssize_t final_len = readlink(target, final_target, sizeof(final_target)-1);
+        if (final_len != -1) {
+            final_target[final_len] = '\0';
+            return parse_deployment_file(final_target);
+        }
+    }
+    
     return parse_deployment_file(target);
 }
 
