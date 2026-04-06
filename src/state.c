@@ -589,3 +589,75 @@ int rollback_deployment(const char *project) {
     
     return EXIT_SUCCESS;
 }
+// Get all deployments for a project by base name (using project_base field)
+Deployment **state_get_by_base(const char *base_project, int *count) {
+    if (strlen(base_path) == 0) {
+        build_paths();
+    }
+    
+    char deploy_path[512];
+    snprintf(deploy_path, sizeof(deploy_path), "%s/deployments", base_path);
+    
+    DIR *dir = opendir(deploy_path);
+    if (!dir) {
+        *count = 0;
+        return NULL;
+    }
+    
+    // First pass: count matching files
+    int max = 0;
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_name[0] == '.') continue;
+        if (!strstr(entry->d_name, ".json")) continue;
+        
+        char fullpath[512];
+        snprintf(fullpath, sizeof(fullpath), "%s/%s", deploy_path, entry->d_name);
+        
+        Deployment *dep = parse_deployment_file(fullpath);
+        if (dep && strcmp(dep->project_base, base_project) == 0) {
+            max++;
+        }
+        if (dep) free(dep);
+    }
+    
+    if (max == 0) {
+        closedir(dir);
+        *count = 0;
+        return NULL;
+    }
+    
+    // Allocate array
+    Deployment **result = malloc(max * sizeof(Deployment*));
+    if (!result) {
+        closedir(dir);
+        *count = 0;
+        return NULL;
+    }
+    
+    // Second pass: read files
+    rewinddir(dir);
+    int idx = 0;
+    while ((entry = readdir(dir)) != NULL && idx < max) {
+        if (entry->d_name[0] == '.') continue;
+        if (!strstr(entry->d_name, ".json")) continue;
+        
+        char fullpath[512];
+        snprintf(fullpath, sizeof(fullpath), "%s/%s", deploy_path, entry->d_name);
+        
+        Deployment *dep = parse_deployment_file(fullpath);
+        if (dep && strcmp(dep->project_base, base_project) == 0) {
+            result[idx++] = dep;
+        } else if (dep) {
+            free(dep);
+        }
+    }
+    
+    closedir(dir);
+    
+    // Sort by version (newest first)
+    qsort(result, idx, sizeof(Deployment*), compare_versions);
+    
+    *count = idx;
+    return result;
+}
