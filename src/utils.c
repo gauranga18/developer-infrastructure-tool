@@ -155,3 +155,38 @@ int copy_file(const char *src, const char *dst) {
     snprintf(cmd, sizeof(cmd), "cp %s %s 2>/dev/null", src, dst);
     return system(cmd);
 }
+
+long file_size_kb(const char *path) {
+    struct stat st;
+    if (stat(path, &st) == 0) {
+        return st.st_size / 1024;
+    }
+    return 0;
+}
+
+long dir_size_kb(const char *path) {
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd), "du -sk %s 2>/dev/null | cut -f1", path);
+    FILE *fp = popen(cmd, "r");
+    if (!fp) return 0;
+    long size;
+    fscanf(fp, "%ld", &size);
+    pclose(fp);
+    return size;
+}
+
+void sha256_file(const char *path, char *out_hex) {
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd), "sha256sum %s 2>/dev/null | cut -d' ' -f1", path);
+    FILE *fp = popen(cmd, "r");
+    if (fp) {
+        fgets(out_hex, 64, fp);
+        pclose(fp);
+    }
+}
+
+int mkdir_p(const char *path) {
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd), "mkdir -p %s", path);
+    return system(cmd);
+}

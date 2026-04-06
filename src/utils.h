@@ -23,4 +23,11 @@ extern volatile sig_atomic_t g_cleaning_up;
 //copy a file from src to dst
 int copy_file(const char *src, const char *dst);
 
+// File utilities
+int copy_file(const char *src, const char *dst);
+long file_size_kb(const char *path);
+long dir_size_kb(const char *path);
+void sha256_file(const char *path, char *out_hex);
+int mkdir_p(const char *path);
+
 #endif

@@ -11,7 +11,7 @@ release: forge
 
 OBJ = main.o utils.o deploy.o help.o config.o clone.o init.o \
       build-path-deployment.o prepare-deploy-workspace.o repo.o \
-      log.o state.o templates.o progress.o remote.o cleanup.o
+      log.o state.o templates.o progress.o remote.o cleanup.o bundle.o diff.o
 
 # Default build (debug)
 all: debug

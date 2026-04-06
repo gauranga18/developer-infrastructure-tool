@@ -48,4 +48,7 @@ int lock_project(const char *project);
 void unlock_project(int fd);
 void get_lock_path(char *path, size_t size, const char *project);
 
+// Get all deployments for a project by base name (using project_base field)
+Deployment **state_get_by_base(const char *base_project, int *count);
+
 #endif

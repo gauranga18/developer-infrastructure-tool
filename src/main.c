@@ -12,6 +12,8 @@
 #include "exit_codes.h"
 #include "state.h"
 #include "cleanup.h"
+#include "bundle.h"
+#include "diff.h"
 
 void load_config(void) {
     const char *home = getenv("HOME");
@@ -39,6 +41,14 @@ void load_config(void) {
         }
     }
     fclose(f);
+}
+
+// Helper to check if a string ends with a suffix
+static int str_ends_with(const char *str, const char *suffix) {
+    size_t str_len = strlen(str);
+    size_t suffix_len = strlen(suffix);
+    if (str_len < suffix_len) return 0;
+    return strcmp(str + str_len - suffix_len, suffix) == 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -173,14 +183,33 @@ int main(int argc, char *argv[]) {
     else if (strcmp(command, "cleanup") == 0 || strcmp(command, "--cleanup") == 0) {
         return run_cleanup(&cleanup_opts);
     }
+    else if (strcmp(command, "bundle") == 0 || strcmp(command, "--bundle") == 0) {
+        if (argc < command_index + 2) {
+            log_error("Usage: forge bundle <project> [--version vN] [-o output] [--ship user@host] [--no-binary] [--dry-run]");
+            return EXIT_BAD_ARGS;
+        }
+        return cmd_bundle(argv[command_index + 1], argc - command_index - 2, argv + command_index + 2);
+    }
+    else if (strcmp(command, "diff") == 0 || strcmp(command, "--diff") == 0) {
+    if (argc < command_index + 2) {
+        log_error("Usage: forge diff <project> [--patch] [--meta-only] [--json]");
+        log_error("       forge diff <project> -v <v1> <v2>");
+        return EXIT_BAD_ARGS;
+    }
+    // argv[command_index + 1] is the project name
+    // Remaining args start at command_index + 2
+    return cmd_diff(argv[command_index + 1], 
+                    argc - command_index - 2, 
+                    argv + command_index + 2);
+    }
     else if (strcmp(command, "deploy") == 0 || strcmp(command, "--deploy") == 0) {
         if (argc < command_index + 2) {
-            log_error("Usage: forge deploy <repo_url> [-i|-d] [--offline]");
+            log_error("Usage: forge deploy <repo_url|bundle.tar.gz> [-i|-d] [--offline]");
             return EXIT_BAD_ARGS;
         }
         
         run_mode_t mode = RUN_DEFAULT;
-        char *repo_url = argv[command_index + 1];
+        char *target = argv[command_index + 1];
         
         for (int i = command_index + 2; i < argc; i++) {
             if (strcmp(argv[i], "-i") == 0) {
@@ -190,7 +219,13 @@ int main(int argc, char *argv[]) {
             }
         }
         
-        return deploy_repo(repo_url, mode, offline_mode, show_progress);
+        // Check if target is a bundle file (.tar.gz)
+        if (str_ends_with(target, ".tar.gz")) {
+            return deploy_from_bundle(target, mode == RUN_DETACHED);
+        }
+        
+        // Normal deployment from URL
+        return deploy_repo(target, mode, offline_mode, show_progress);
     }
     else if (strcmp(command, "init") == 0 || strcmp(command, "--init") == 0) {
         if (argc < command_index + 2) {
