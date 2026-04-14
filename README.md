@@ -335,4 +335,3 @@ MIT License — see [LICENSE](LICENSE) file for details.
 [GitHub](https://github.com/gauranga18/forge) • [Issues](https://github.com/gauranga18/forge/issues)
 
 </div>
-```
